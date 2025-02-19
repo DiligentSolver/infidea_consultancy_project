@@ -7,13 +7,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:infidea_consultancy_app/app.dart';
+import 'package:infidea_consultancy_app/data/repositories/auth_repository.dart';
 
 import 'package:infidea_consultancy_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+Future<void> main() async {
+
+  final prefs = await SharedPreferences.getInstance();
+  final bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+
+  final AuthRepository authRepository =  AuthRepository();
+
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(isFirstLaunch: isFirstLaunch, authRepository: authRepository,));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

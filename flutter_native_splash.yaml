@@ -3,9 +3,12 @@ flutter_native_splash:
   color_dark: "#ffffff"
   image: assets/splash-logo/Infidea_Splash_Logo(500 x 500px).png
   image_dark: assets/splash-logo/Infidea_Splash_Logo(500 x 500px).png
+  full_screen: true
   android_12:
     color: "#ffffff"
     color_dark: "#ffffff"
     image: assets/splash-logo/Infidea_Splash_Logo_1152px_649px.png
     image_dark: assets/splash-logo/Infidea_Splash_Logo_1152px_649px.png
+    full_screen: true
+
   web: false
