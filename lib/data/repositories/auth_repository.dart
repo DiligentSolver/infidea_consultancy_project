@@ -65,7 +65,7 @@ class AuthRepository {
       }
 
       UserModel user = UserModel.fromJson(response.data);
-      await saveToken(user.token);
+      await saveToken(user.token??'');
       print(getToken());
       return user;
     } on DioException catch (e) {
@@ -134,7 +134,7 @@ class AuthRepository {
       }
 
       UserModel user = UserModel.fromJson(response.data);
-      await saveToken(user.token);
+      await saveToken(user.token??'');
 
       return user;
     } on DioException catch (e) {

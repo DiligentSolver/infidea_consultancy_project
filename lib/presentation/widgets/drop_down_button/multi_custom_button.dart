@@ -103,7 +103,7 @@ class MultiCustomDropdownState extends State<MultiCustomDropdown> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: MYColors.secondarylighterColor),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(

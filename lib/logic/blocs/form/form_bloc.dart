@@ -1,5 +1,9 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infidea_consultancy_app/data/model/user_model.dart';
+import 'package:infidea_consultancy_app/logic/blocs/auth/auth_bloc.dart';
+import '../auth/auth_event.dart';
 import 'form_event.dart';
 import 'form_state.dart';
 import '../../../data/repositories/auth_repository.dart';
@@ -20,42 +24,8 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
     final UserModel userData =
     UserModel.fromJson(responseData as Map<String, dynamic>);
 
-    // Extract first education entry (if available) for correct mapping
-    final educationDetails = userData.education.isNotEmpty ? userData.education.first : null;
-
     emit(state.copyWith(
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      fatherName: userData.fatherName,
-      email: userData.email,
       mobile: userData.mobile,
-      dob: DateTime.tryParse(userData.dob)?.toLocal(),
-      gender: userData.gender,
-      experience: userData.experience,
-      currentCity: userData.currentCity,
-      currentLocality: userData.currentLocality,
-      preferredCities: userData.preferredCities.map((city) => city.city).toList(),
-      languages: userData.languagesKnown,
-      selectedRoles: userData.preferredRoles ?? [],
-
-      // Education Fields
-      educationLevel: educationDetails?.educationLevel ?? '',
-      isCurrentlyStudying: educationDetails?.isCurrentlyStudying,
-      graduateCollege: educationDetails?.college ?? '',
-      graduateDegree: educationDetails?.degree ?? '',
-      graduateStartYear: educationDetails?.startingYear ?? '',
-      graduateEndYear: educationDetails?.passingYear ?? '',
-      graduateUniversity: educationDetails?.university ?? '',
-      graduateGrade: educationDetails?.grade ?? '',
-      graduateBranch: educationDetails?.branch ?? '',
-
-      postGraduateCollege: educationDetails?.postgraduateCollege ?? '',
-      postGraduateDegree: educationDetails?.postgraduateDegree ?? '',
-      postGraduateStartYear: educationDetails?.postgraduateStartingYear ?? '',
-      postGraduateEndYear: educationDetails?.postgraduatePassingYear ?? '',
-      postGraduateUniversity: educationDetails?.postgraduateUniversity ?? '',
-      postGraduateBranch: educationDetails?.postgraduateBranch ?? '',
-      postGraduateGrade: educationDetails?.postgraduateGrade ?? '',
     ));
   }
 
@@ -73,6 +43,8 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
       currentCity: event.currentCity ?? state.currentCity,
       currentLocality: event.currentLocality ?? state.currentLocality,
       preferredCities: event.preferredCities ?? state.preferredCities,
+      isCurrentlyStudying: event.isCurrentlyStudying??state.isCurrentlyStudying,
+      educationLevel: event.educationLevel??state.educationLevel,
       languages: event.languages ?? state.languages,
       selectedRoles: event.selectedRoles ?? state.selectedRoles,
       graduateCollege: event.graduateCollege ?? state.graduateCollege,
@@ -102,10 +74,16 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
   }
 
   Future<void> _onCompleteForm(
-      CompleteForm event, Emitter<UserFormState> emit) async {
+      CompleteForm event,
+      Emitter<UserFormState> emit,
+      ) async {
     if (state.isComplete()) {
-      await authRepository
-          .registerNewUser({'user': state.toJson()} as UserModel);
+      // Convert the state to UserModel
+      final userModel = UserModel.fromJson({'user':state.toUserModelJson()});
+      // Ensure AuthBloc is injected properly instead of using context.read
+      final authBloc = AuthBloc(authRepository); // Pass AuthBloc as a dependency to this bloc
+      authBloc.add(RegisterNewUserEvent(userModel));
     }
   }
+
 }

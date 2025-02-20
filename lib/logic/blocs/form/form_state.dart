@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:infidea_consultancy_app/data/model/user_model.dart';
 
+import '../../../core/utils/constants/texts.dart';
+
 class UserFormState extends Equatable {
   final String? firstName;
   final String? lastName;
@@ -173,16 +175,71 @@ class UserFormState extends Equatable {
         experience != null;
   }
 
+  bool isStepTwoValid() {
+    return (currentCity == 'indore' || currentCity == 'Indore' ? currentLocality != null : true) &&
+        preferredCities != null && preferredCities!.isNotEmpty && languages != null && languages!.isNotEmpty;
+  }
+
+  bool isStepThreeValid() {
+    // Step 1: Check if mandatory fields are filled
+    if (isCurrentlyStudying == null || educationLevel == null) {
+      return false;
+    }
+
+    // Step 2: If user selects Graduate or Postgraduate, ensure all fields are filled
+    if (educationLevel == MYTexts.graduate || educationLevel == MYTexts.postGraduate) {
+      if (graduateCollege == null || graduateCollege!.isEmpty) return false;
+      if (graduateDegree == null || graduateDegree!.isEmpty) return false;
+      if (graduateStartYear == null || graduateStartYear!.isEmpty) return false;
+      if (graduateEndYear == null || graduateEndYear!.isEmpty) return false;
+
+      // Ensure Start Year is before End Year
+      if (int.tryParse(graduateStartYear!) != null &&
+          int.tryParse(graduateEndYear!) != null) {
+        if (int.parse(graduateStartYear!) >= int.parse(graduateEndYear!)) {
+          return false;
+        }
+      }
+    }
+
+    // Step 3: If Postgraduate, ensure post-graduate details are also filled
+    if (educationLevel == MYTexts.postGraduate) {
+      if (postGraduateCollege == null || postGraduateCollege!.isEmpty) {
+        return false;
+      }
+      if (postGraduateDegree == null || postGraduateDegree!.isEmpty) {
+        return false;
+      }
+      if (postGraduateStartYear == null || postGraduateStartYear!.isEmpty) {
+        return false;
+      }
+      if (postGraduateEndYear == null || postGraduateEndYear!.isEmpty) {
+        return false;
+      }
+
+      // Ensure Postgraduate Start Year is before End Year
+      if (int.tryParse(postGraduateStartYear!) != null &&
+          int.tryParse(postGraduateEndYear!) != null) {
+        if (int.parse(postGraduateStartYear!) >=
+            int.parse(postGraduateEndYear!)) {
+          return false;
+        }
+      }
+    }
+
+    // If all checks pass, return true
+    return true;
+  }
+
+
+
+  bool isStepFiveValid() {
+    return selectedRoles != null && selectedRoles!.isNotEmpty;
+
+  }
+
   bool isComplete() {
-    return isStepOneValid() &&
-        currentCity != null &&
-        (currentCity == 'Indore' ? currentLocality != null : true) &&
-        preferredCities != null &&
-        preferredCities!.isNotEmpty &&
-        languages != null &&
-        languages!.isNotEmpty &&
-        selectedRoles != null &&
-        selectedRoles!.isNotEmpty;
+    return isStepOneValid() && isStepTwoValid()&&isStepThreeValid()&&isStepFiveValid();
   }
 
   // Add the toJson method here
@@ -197,35 +254,82 @@ class UserFormState extends Equatable {
       'gender': gender,
       'experience': experience,
       'currentCity': currentCity,
-      'currentLocality': currentLocality,
-      'preferredCities':
-          preferredCities?.map((x) => PreferredCity(city: x)).toList(),
+      'currentLocality': currentCity=='indore'||currentCity=='Indore'? currentLocality:null,
+      'preferredCities': preferredCities,
       'languagesKnown': languages,
       'selectedRoles': selectedRoles,
       'education': Education(
-              degree: graduateDegree ?? '',
-              college: graduateCollege ?? '',
-              university: graduateUniversity ?? '',
-              passingYear: graduateEndYear ?? '',
-              startingYear: graduateStartYear ?? '',
-              grade: graduateGrade ?? '',
-              branch: graduateBranch ?? '',
+              degree: graduateDegree,
+              college: graduateCollege ,
+              university: graduateUniversity,
+              passingYear: graduateEndYear,
+              startingYear: graduateStartYear,
+              grade: graduateGrade,
+              branch: graduateBranch,
               isCurrentlyStudying: isCurrentlyStudying,
-              educationLevel: educationLevel ?? '',
-              postgraduateDegree: postGraduateDegree ?? '',
-              postgraduateCollege: postGraduateCollege ?? '',
-              postgraduateUniversity: postGraduateUniversity ?? '',
-              postgraduatePassingYear: postGraduateEndYear ?? '',
-              postgraduateStartingYear: postGraduateStartYear ?? '',
-              postgraduateGrade: postGraduateGrade ?? '',
-              postgraduateBranch: postGraduateBranch ?? '')
+              educationLevel: educationLevel,
+              postgraduateDegree: postGraduateDegree,
+              postgraduateCollege: postGraduateCollege,
+              postgraduateUniversity: postGraduateUniversity,
+              postgraduatePassingYear: postGraduateEndYear,
+              postgraduateStartingYear: postGraduateStartYear,
+              postgraduateGrade: postGraduateGrade,
+              postgraduateBranch: postGraduateBranch)
           .toJson(),
+    };
+  }
+
+  // Add the toJson method here
+  Map<String, dynamic> toUserModelJson() {
+
+    final education = [
+    {
+    'degree': graduateDegree,
+    'college': graduateCollege,
+    'university': graduateUniversity,
+    'passingYear': graduateEndYear,
+    'startingYear': graduateStartYear,
+    'grade': graduateGrade,
+    'branch': graduateBranch,
+    'educationLevel': educationLevel,
+    'isCurrentlyStudying': isCurrentlyStudying,
+    'postgraduateDegree': postGraduateDegree,
+    'postgraduateCollege': postGraduateCollege,
+    'postgraduateUniversity': postGraduateUniversity,
+    'postgraduateStartingYear': postGraduateStartYear,
+    'postgraduatePassingYear': postGraduateEndYear,
+    'postgraduateGrade': postGraduateGrade,
+    'postgraduateBranch': postGraduateBranch
+    }
+    ];
+
+
+
+    List<Map<String, dynamic>>? formattedCities = preferredCities?.map((city) =>
+        PreferredCity(city: city).toJson()
+    ).toList();
+
+    return {
+      'firstName': firstName,
+      'lastName': lastName,
+      'fatherName': fatherName,
+      'email': email,
+      'mobile': mobile,
+      'dob': dob.toString(),
+      'gender': gender,
+      'experience': experience,
+      'currentCity': currentCity,
+      'currentLocality': currentCity=='indore'||currentCity=='Indore'? currentLocality:null,
+      'preferredCities': formattedCities,
+      'languagesKnown': languages,
+      'selectedRoles': selectedRoles,
+      'education': education,
     };
   }
 
   double calculateProgress() {
     int filledFields = 0;
-    int totalFields = 23; // Step One + Step Two + Step Three + Step Four + Step Five
+    int totalFields = 14; // Step One + Step Two + Step Three + Step Four + Step Five
 
     // Step One Fields
     if (firstName?.isNotEmpty ?? false) filledFields++;
@@ -239,7 +343,6 @@ class UserFormState extends Equatable {
 
     // Step Two Fields
     if (currentCity != null) filledFields++;
-    if (currentLocality != null) filledFields++;
     if (preferredCities != null && preferredCities!.isNotEmpty) filledFields++;
     if (languages != null && languages!.isNotEmpty) filledFields++;
 
@@ -247,14 +350,6 @@ class UserFormState extends Equatable {
 
     if (isCurrentlyStudying != null) filledFields++;
     if (educationLevel != null) filledFields++;
-    if (graduateCollege != null) filledFields++;
-    if (graduateDegree != null) filledFields++;
-    if (graduateStartYear != null) filledFields++;
-    if (graduateEndYear != null) filledFields++;
-    if (postGraduateCollege != null) filledFields++;
-    if (postGraduateDegree != null) filledFields++;
-    if (postGraduateStartYear != null) filledFields++;
-    if (postGraduateEndYear != null) filledFields++;
 
     //Step Four Fields
 

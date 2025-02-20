@@ -13,12 +13,12 @@ class MultiDropdownSelect extends StatefulWidget {
   final ValueChanged<List<String>>? onSelectionChanged;
   final int maxSelection;
   final String? question;
-  final bool isDown;
+  final bool isDown, isHint;
 
   const MultiDropdownSelect({
     super.key,
     required this.items,
-    this.isDown = false,
+    this.isDown = false,this.isHint=true,
     this.selectedItems = const [],
     this.onSelectionChanged,
     required this.maxSelection,
@@ -126,7 +126,7 @@ class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color:MYColors.secondarylighterColor),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -136,7 +136,7 @@ class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
                   child: Text(
                     selectedItems.isEmpty
                         ? "You can select up to ${widget.maxSelection}"
-                        : selectedItems.join(", "),
+                        : widget.isHint ? selectedItems.join(", "): "You can select up to ${widget.maxSelection}",
                     overflow: TextOverflow.ellipsis,
                     style: MYAppTextStyles.labelLarge(),
                   ),

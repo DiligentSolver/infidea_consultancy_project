@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
+import 'package:infidea_consultancy_app/core/utils/helpers/helper_functions.dart';
 import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
 import '../constants/colors.dart';
 
@@ -169,7 +170,7 @@ class Bars {
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(MySizes.borderRadiusXxl),
-            color: MYColors.black.withOpacity(0.7),
+            color: MYAppHelperFunctions.isDarkMode(context)? MYColors.white.withOpacity(0.8) :MYColors.black.withOpacity(0.7),
           ),
           child: Center(
             child: Text(

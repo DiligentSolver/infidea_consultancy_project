@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/texts.dart';
+import 'package:infidea_consultancy_app/core/utils/helpers/bars.dart';
 import 'package:infidea_consultancy_app/logic/blocs/form/form_bloc.dart';
 import 'package:infidea_consultancy_app/logic/blocs/form/form_state.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/drop_down_button/single_drop_down.dart';
@@ -22,7 +23,6 @@ class StepThreeCollection extends StatefulWidget {
 }
 
 class StepThreeCollectionState extends State<StepThreeCollection> {
-  final _formKey = GlobalKey<FormState>();
 
   final List<String> educationOptions = [
     MYTexts.below10th,
@@ -170,39 +170,14 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
   }
 
   void _validateAndProceed() {
-    if (_formKey.currentState!.validate()) {
       final formBloc = context.read<FormBloc>();
       final formState = formBloc.state;
-      if (formState.educationLevel!=null&&formState.isCurrentlyStudying!=null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(MYTexts.studyStatusRequired),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
+      if (formState.isStepThreeValid()) {
+        context.read<FormBloc>().add(SubmitForm());
+        Navigator.pushNamed(context, '/stepFourCollection');
+      }else{
+        Bars.showCustomToast(context: context, message: 'Select your choice');
       }
-
-      if (formState.isCurrentlyStudying == true && formState.educationLevel == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(MYTexts.currentStudyLevelRequired),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-      context.read<FormBloc>().add(SubmitForm());
-      Navigator.pushNamed(context, '/stepFourCollection');
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(MYTexts.fillAllFieldsError),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   Widget _buildDegreeDetailsSection({
@@ -221,17 +196,17 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
         SingleDropdownSelect(
           question: MYTexts.collegeName,
           items: collegeNames,
-          isDown: true,
           selectedItem: selectedCollege,
           onSelectionChanged:  onCollegeChanged,
+          isDown: true,
         ),
         verticalSpace(MySizes.spaceBtwSections.r),
         SingleDropdownSelect(
           question: MYTexts.degreeNameLabel,
           items: degreeNames,
-          isDown: true,
           selectedItem: selectedDegree,
           onSelectionChanged:  onDegreeChanged,
+          isDown: true,
         ),
         verticalSpace(MySizes.spaceBtwSections.r),
         RowCustomDropdown(
@@ -242,7 +217,7 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
             selectedEndYear = endYear.toString();
           });
         },
-        isDown: true,
+          isDown: true,
         )
       ],
     );
@@ -251,7 +226,23 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocBuilder<FormBloc,UserFormState>(
+      child: BlocConsumer<FormBloc,UserFormState>(
+        listener: (BuildContext context, UserFormState formState) {
+          formState.copyWith(
+            isCurrentlyStudying: formState.isCurrentlyStudying,
+            educationLevel: formState.educationLevel,
+            graduateCollege: formState.graduateCollege,
+            graduateDegree: formState.graduateDegree,
+            graduateStartYear: formState.graduateStartYear,
+            graduateEndYear: formState.graduateEndYear,
+            postGraduateCollege: formState.postGraduateCollege,
+            postGraduateDegree: postGraduateDegree,
+            postGraduateStartYear: postGraduateStartYear,
+            postGraduateEndYear: postGraduateEndYear,
+          );
+          // print(formState.isCurrentlyStudying);
+          print(formState.educationLevel);
+        },
         builder: (context,formState){
           final formBloc = context.read<FormBloc>();
           return Scaffold(
@@ -262,101 +253,109 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
             ),
           ),
           appBar: AppBar(
-            title: CustomLinearProgressIndicator(progress: formState.calculateProgress()),
+              title: Row(
+                children: [
+                  Expanded(child: CustomLinearProgressIndicator(progress: formState.calculateProgress())),
+                  horizontalSpace(MySizes.spaceBtwItems.r),
+                  const Text("Page: 3/5"),
+                ],
+              )
           ),
           body: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
               child: Center(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      verticalSpace(MySizes.defaultSpace.r),
-                      CustomChoiceChipList(
-                        question: MYTexts.areYouCurrentlyStudying,
-                        groupValue: formState.isCurrentlyStudying.toString(),
-                        options: currentlyStudingOptions,
-                        onChanged: (value) {
-                          formBloc.add(UpdateFormEvent(isCurrentlyStudying: formState.isCurrentlyStudying));
-                          print(formState.isCurrentlyStudying);
-                        },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    verticalSpace(MySizes.defaultSpace.r),
+                    Text(
+                      'Education Details',
+                      style: MYAppTextStyles.titleLarge(fontWeight: FontWeight.bold),
+                    ),
+                    verticalSpace(MySizes.spaceBtwSectionsLg.r),
+                    CustomChoiceChipList(
+                      question: MYTexts.areYouCurrentlyStudying,
+                      groupValue: formState.isCurrentlyStudying.toString(),
+                      options: currentlyStudingOptions,
+                      onChanged: (value) {
+                        bool? isStudying = value == "true";
+                        formBloc.add(UpdateFormEvent(isCurrentlyStudying: isStudying));
+                      },
+                    ),
+                    verticalSpace(MySizes.spaceBtwSections.r),
+                    CustomChoiceChipList(
+                      question: MYTexts.education,
+                      options: educationOptions,
+                      groupValue: formState.educationLevel,
+                      onChanged: (value) {
+                        formBloc.add(UpdateFormEvent(educationLevel: value));
+                      },
+                    ),
+                    verticalSpace(MySizes.spaceBtwSections.r),
+                    if (formState.educationLevel == MYTexts.graduate ||
+                        formState.educationLevel == MYTexts.postGraduate) ...[
+                      Text(
+                        MYTexts.graduateDetails,
+                        style: MYAppTextStyles.titleLarge(
+                            fontWeight: FontWeight.bold),
                       ),
-                      verticalSpace(MySizes.spaceBtwSections.r),
-                      CustomChoiceChipList(
-                        question: MYTexts.education,
-                        options: educationOptions,
-                        groupValue: formState.educationLevel,
-                        onChanged: (value) {
-                          formBloc.add(UpdateFormEvent(educationLevel: value));
+                      verticalSpace(MySizes.spaceBtwItems.r),
+                      _buildDegreeDetailsSection(
+                        degreeType: "Graduate",
+                        selectedCollege: formState.graduateCollege,
+                        selectedDegree: formState.graduateDegree,
+                        selectedStartYear: formState.graduateStartYear,
+                        selectedEndYear: formState.graduateEndYear,
+                        onCollegeChanged: (val) {
+                          formBloc.add(UpdateFormEvent(graduateCollege: val));
+                        } ,
+                        onDegreeChanged: (val) {
+                          formBloc.add(UpdateFormEvent(graduateDegree: val));
                         },
+                        onStartYearChanged: (val) {
+                          formBloc.add(UpdateFormEvent(graduateStartYear: val));
+                        } ,
+                        onEndYearChanged: (val) {
+                          formBloc.add(UpdateFormEvent(graduateEndYear: val));
+                        } ,
                       ),
-                      verticalSpace(MySizes.spaceBtwSections.r),
-                      if (formState.educationLevel == MYTexts.graduate ||
-                          formState.educationLevel == MYTexts.postGraduate) ...[
-                        Text(
-                          MYTexts.graduateDetails,
-                          style: MYAppTextStyles.titleLarge(
-                              fontWeight: FontWeight.bold),
-                        ),
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        _buildDegreeDetailsSection(
-                          degreeType: "Graduate",
-                          selectedCollege: formState.graduateCollege,
-                          selectedDegree: formState.graduateDegree,
-                          selectedStartYear: formState.graduateStartYear,
-                          selectedEndYear: formState.graduateEndYear,
-                          onCollegeChanged: (val) {
-                            formBloc.add(UpdateFormEvent(graduateCollege: val));
-                          } ,
-                          onDegreeChanged: (val) {
-                            formBloc.add(UpdateFormEvent(graduateDegree: val));
-                          },
-                          onStartYearChanged: (val) {
-                            formBloc.add(UpdateFormEvent(graduateStartYear: val));
-                          } ,
-                          onEndYearChanged: (val) {
-                            formBloc.add(UpdateFormEvent(graduateEndYear: val));
-                          } ,
-                        ),
-                      ],
-                      verticalSpace(MySizes.spaceBtwSections.r),
-                      if (formState.educationLevel == MYTexts.postGraduate) ...[
-                        Text(
-                          MYTexts.postGraduateDetails,
-                          style: MYAppTextStyles.titleLarge(
-                              fontWeight: FontWeight.bold),
-                        ),
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        _buildDegreeDetailsSection(
-                          degreeType: "Post Graduate",
-                          selectedCollege: postGraduateCollege,
-                          selectedDegree: postGraduateDegree,
-                          selectedStartYear: postGraduateStartYear,
-                          selectedEndYear: postGraduateEndYear,
-                          onCollegeChanged: (val) {
-                            formBloc.add(UpdateFormEvent(postGraduateCollege: val));
-                          } ,
-                          onDegreeChanged: (val) {
-                            formBloc.add(UpdateFormEvent(postGraduateDegree: val));
-                          },
-                          onStartYearChanged: (val) {
-                            formBloc.add(UpdateFormEvent(postGraduateStartYear: val));
-                          } ,
-                          onEndYearChanged: (val) {
-                            formBloc.add(UpdateFormEvent(postGraduateEndYear: val));
-                          } ,
-                        ),
-                        verticalSpace(MySizes.spaceBtwSectionsLg.r)
-                      ],
                     ],
-                  ),
+                    verticalSpace(MySizes.spaceBtwSections.r),
+                    if (formState.educationLevel == MYTexts.postGraduate) ...[
+                      Text(
+                        MYTexts.postGraduateDetails,
+                        style: MYAppTextStyles.titleLarge(
+                            fontWeight: FontWeight.bold),
+                      ),
+                      verticalSpace(MySizes.spaceBtwItems.r),
+                      _buildDegreeDetailsSection(
+                        degreeType: "Post Graduate",
+                        selectedCollege: formState.postGraduateCollege,
+                        selectedDegree: formState.postGraduateDegree,
+                        selectedStartYear: formState.postGraduateStartYear,
+                        selectedEndYear: formState.postGraduateEndYear,
+                        onCollegeChanged: (val) {
+                          formBloc.add(UpdateFormEvent(postGraduateCollege: val));
+                        } ,
+                        onDegreeChanged: (val) {
+                          formBloc.add(UpdateFormEvent(postGraduateDegree: val));
+                        },
+                        onStartYearChanged: (val) {
+                          formBloc.add(UpdateFormEvent(postGraduateStartYear: val));
+                        } ,
+                        onEndYearChanged: (val) {
+                          formBloc.add(UpdateFormEvent(postGraduateEndYear: val));
+                        } ,
+                      ),
+                      verticalSpace(MySizes.spaceBtwSectionsLg.r)
+                    ],
+                  ],
                 ),
               ),
             ),
           ),
-        );}
+        );},
       ),
     );
   }
