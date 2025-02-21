@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -123,27 +124,57 @@ class AuthRepository {
 
   Future<UserModel?> registerNewUser(UserModel userModel) async {
     try {
-      // **Add a delay before calling API**
+      // Delay for API call simulation
       await Future.delayed(const Duration(seconds: 2));
 
-      final response =
-          await _dio.post('api/auth/user-register', data: userModel.toJson());
+      final response = await _dio.post(
+        'api/auth/user-register',
+        data: userModel,
+        options: Options(headers: {"Content-Type": "application/json"}), // Important!
+      );
 
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception("Invalid response from server");
       }
 
       UserModel user = UserModel.fromJson(response.data);
-      await saveToken(user.token??'');
+      await saveToken(user.token ?? '');
 
       return user;
     } on DioException catch (e) {
-      _handleDioException(e, 'Failed to verify OTP');
+      _handleDioException(e, 'Failed to register user');
     } catch (e) {
-      throw Exception('An unexpected error occurred while verifying OTP');
+      throw Exception('An unexpected error occurred while registering user');
     }
     return null;
   }
+
+  Future<UserModel?> registerNewUserForm(Map<String,dynamic> formData) async {
+    try {
+      // Delay for API call simulation
+      await Future.delayed(const Duration(seconds: 2));
+
+      final response = await _dio.post(
+        'api/auth/user-register',
+        data: jsonEncode(formData));
+
+      if (response.data == null || response.data is! Map<String, dynamic>) {
+        throw Exception("Invalid response from server");
+      }
+
+      UserModel user = UserModel.fromJson(response.data);
+      await saveToken(user.token ?? '');
+
+      return user;
+    } on DioException catch (e) {
+      _handleDioException(e, 'Failed to register user');
+    } catch (e) {
+      throw Exception('An unexpected error occurred while registering user');
+    }
+    return null;
+  }
+
+
 
   Future<Map<String, dynamic>?> fetchUserDetails(String token) async {
     try {
@@ -212,9 +243,12 @@ class AuthRepository {
         ),
       );
 
+
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception("Invalid response from server");
       }
+
+      return response.data;
 
     } on DioException catch (e) {
       final result = e.response?.data;

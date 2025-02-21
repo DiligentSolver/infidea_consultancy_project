@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 
 abstract class FormEvent extends Equatable {
   @override
@@ -18,6 +21,11 @@ class UpdateFormEvent extends FormEvent {
   final DateTime? dob;
   final String? gender;
   final String? experience;
+  final String? state;
+  final List<Map<String, dynamic>>? states;
+  final List<String>? cities;
+  final List<String>? metroCities;
+  final List<String>? indoreLocalities;
   final String? currentCity;
   final String? currentLocality;
   final List<String>? preferredCities;
@@ -39,8 +47,10 @@ class UpdateFormEvent extends FormEvent {
   final String? postGraduateUniversity;
   final String? postGraduateBranch;
   final String? postGraduateGrade;
+  final File? resumeFile;
+  final File? imageFile;
 
-  UpdateFormEvent({
+  UpdateFormEvent( {
     this.firstName,
     this.lastName,
     this.fatherName,
@@ -70,16 +80,23 @@ class UpdateFormEvent extends FormEvent {
     this.postGraduateUniversity,
     this.postGraduateBranch,
     this.postGraduateGrade,
+    this.imageFile,
+    this.resumeFile,
+    this.state,
+    this.metroCities,
+    this.states,
+    this.cities,
+    this.indoreLocalities
   });
 
   @override
   List<Object?> get props => [
     firstName, lastName, fatherName, email, mobile, dob,
-    gender, experience, currentCity, currentLocality,
+    gender, experience, state,currentCity, currentLocality,
     preferredCities, languages, selectedRoles, educationLevel,
     isCurrentlyStudying, graduateCollege, graduateDegree,
     graduateStartYear, graduateEndYear, graduateUniversity,graduateBranch,graduateGrade,postGraduateCollege,
-    postGraduateDegree, postGraduateStartYear, postGraduateEndYear,postGraduateUniversity,postGraduateBranch,postGraduateGrade
+    postGraduateDegree, postGraduateStartYear, postGraduateEndYear,postGraduateUniversity,postGraduateBranch,postGraduateGrade,resumeFile,imageFile,indoreLocalities,cities,metroCities,states
   ];
 }
 
@@ -87,4 +104,7 @@ class UpdateFormEvent extends FormEvent {
 class SubmitForm extends FormEvent {}
 
 // Final submission after completing all steps
-class CompleteForm extends FormEvent {}
+class CompleteForm extends FormEvent {
+  final BuildContext context;  // ✅ Add context parameter
+  CompleteForm(this.context);
+}

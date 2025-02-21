@@ -47,6 +47,28 @@ class MYValidator {
     return null;
   }
 
+  /// Validates First Name & Last Name
+  static String? validateName(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return "$fieldName is required";
+    }
+    if (!RegExp(r"^[A-Za-z]{2,30}$").hasMatch(value.trim())) {
+      return "$fieldName atleast 2 character";
+    }
+    return null;
+  }
+
+  /// Validates Father's Name (Allows Spaces)
+  static String? validateFatherName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Father’s Name is required";
+    }
+    if (!RegExp(r"^[A-Za-z ]{2,40}$").hasMatch(value.trim())) {
+      return "Father’s Name must contain only letters & spaces";
+    }
+    return null;
+  }
+
   // // Password Validation (Strong)
   // // Enhanced Password Validation
   // static String? validatePassword(String? value) {

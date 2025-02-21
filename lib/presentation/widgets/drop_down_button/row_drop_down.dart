@@ -40,16 +40,29 @@ class _RowCustomDropdownState extends State<RowCustomDropdown> {
   int? selectedValue2;
   TextEditingController searchController1 = TextEditingController();
   TextEditingController searchController2 = TextEditingController();
-  late List<int> filteredItems1;
-  late List<int> filteredItems2;
+  List<int> filteredItems1 = [];
+  List<int> filteredItems2 = [];
 
   @override
   void initState() {
     super.initState();
-    filteredItems1 = List.generate(widget.maxValue1 - widget.minValue1 + 1, (index) => widget.minValue1 + index);
-    filteredItems2 = List.generate(widget.maxValue2 - widget.minValue2 + 1, (index) => widget.minValue2 + index);
+    updateFilteredItems1("");
+    updateFilteredItems2("");
   }
 
+  void updateFilteredItems1(String query) {
+    filteredItems1 = List.generate(
+      widget.maxValue1 - widget.minValue1 + 1,
+          (index) => widget.minValue1 + index,
+    ).where((item) => item.toString().contains(query)).toList();
+  }
+
+  void updateFilteredItems2(String query) {
+    filteredItems2 = List.generate(
+      widget.maxValue2 - widget.minValue2 + 1,
+          (index) => widget.minValue2 + index,
+    ).where((item) => item.toString().contains(query)).toList();
+  }
   @override
   Widget build(BuildContext context) {
     return Column(

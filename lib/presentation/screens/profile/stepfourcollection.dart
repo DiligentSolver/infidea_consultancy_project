@@ -27,10 +27,11 @@ class StepFourCollection extends StatefulWidget {
 
 class StepFourCollectionState extends State<StepFourCollection> {
   final _formKey4 = GlobalKey<FormState>();
-  File? imageFile;
-  File? resumeFile;
 
   Future<void> _pickResume() async {
+    final formBloc = context.read<FormBloc>();
+    final formState = formBloc.state;
+
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -38,9 +39,7 @@ class StepFourCollectionState extends State<StepFourCollection> {
       );
 
       if (result != null) {
-        setState(() {
-          resumeFile = File(result.files.single.path!);
-        });
+        formBloc.add(UpdateFormEvent(resumeFile: File(result.files.single.path!)));
       }
     } catch (e) {
      Bars.showCustomToast(context: context, message: MYTexts.uploadFailedResume);
@@ -54,7 +53,9 @@ class StepFourCollectionState extends State<StepFourCollection> {
   }
 
   void _validateAndProceed() {
-    if (imageFile != null && resumeFile != null) {
+    final formBloc = context.read<FormBloc>();
+    final formState = formBloc.state;
+    if (formState.isStepFourValid()) {
       // Add your logic to handle the files
       context.read<FormBloc>().add(SubmitForm());
       Navigator.pushNamed(context, '/stepFiveCollection');
@@ -66,8 +67,14 @@ class StepFourCollectionState extends State<StepFourCollection> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocBuilder<FormBloc,UserFormState>(
-        builder:(context,formState){return Scaffold(
+      child: BlocConsumer<FormBloc,UserFormState>(
+        listener: (context,formState){
+          context.read<FormBloc>().add(UpdateFormEvent(imageFile: formState.imageFile));
+          context.read<FormBloc>().add(UpdateFormEvent(resumeFile: formState.resumeFile));
+        },
+        builder:(context,formState){
+          final formBloc = context.read<FormBloc>();
+          return Scaffold(
           appBar: AppBar(
               title: Row(
                 children: [
@@ -94,8 +101,8 @@ class StepFourCollectionState extends State<StepFourCollection> {
                     children: [
                       // Profile Picture Section
                       verticalSpace(MySizes.defaultSpace.r),
-                      MYEditableProfileImage(onImageSelected: (profileImage){
-                        imageFile=profileImage;
+                      MYEditableProfileImage(defaultImage: formState.imageFile,onImageSelected: (profileImage){
+                     formBloc.add(UpdateFormEvent(imageFile: profileImage));
                       }),
                       verticalSpace(MySizes.spaceBtwItems.r),
                       Align(
@@ -109,12 +116,10 @@ class StepFourCollectionState extends State<StepFourCollection> {
                       verticalSpace(MySizes.spaceBtwSectionsLg.r),
                       // Resume Section
                       ResumeUploadWidget(
-                        resumePath: resumeFile?.path.split('/').last,
+                        resumePath: formState.resumeFile?.path.split('/').last,
                         onPickResume: _pickResume,
                         onRemoveResume: () {
-                          setState(() {
-                            resumeFile = null;
-                          });
+                           formBloc.add(UpdateFormEvent(resumeFile:null));
                         },
                       )
                     ],

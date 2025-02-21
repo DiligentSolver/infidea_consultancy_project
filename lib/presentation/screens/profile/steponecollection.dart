@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
 import 'package:infidea_consultancy_app/core/utils/helpers/bars.dart';
 import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
+import 'package:infidea_consultancy_app/core/utils/validators/validator.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/input_fields/text_form_field.dart';
 import '../../../core/utils/constants/texts.dart';
 import '../../../logic/blocs/form/form_bloc.dart';
@@ -86,7 +87,7 @@ class StepOneCollectionState extends State<StepOneCollection> {
       child: BlocConsumer<FormBloc, UserFormState>(
         listener: (context, formState) {
 
-         var check =  formState.copyWith(
+          formState.copyWith(
             firstName: formState.firstName,
             lastName: formState.lastName,
             fatherName: formState.fatherName,
@@ -96,8 +97,6 @@ class StepOneCollectionState extends State<StepOneCollection> {
             gender: formState.gender,
             experience: formState.experience,
           );
-
-         print(check);
 
           firstNameController.text = formState.firstName ?? "";
           lastNameController.text = formState.lastName ?? "";
@@ -130,123 +129,124 @@ class StepOneCollectionState extends State<StepOneCollection> {
             body: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
-                child: Center(
-                  child: Form(
-                    key: _formKey,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        Text(
-                          'Personal Details (1/2)',
-                          style: MYAppTextStyles.titleLarge(fontWeight: FontWeight.bold),
-                        ),
-                        verticalSpace(MySizes.spaceBtwSections.r),
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Personal Details (1/2)',
+                        style: MYAppTextStyles.titleLarge(fontWeight: FontWeight.bold),
+                      ),
+                      verticalSpace(MySizes.spaceBtwSections.r),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: MYInputField(
-                                prefixIcon: const Icon(Icons.person),
-                                hintText: MYTexts.enterFirstName,
-                                maxLines: 1,
-                                maxLength: 32,
-                                labelText: 'First Name',
-                                controller: firstNameController,
-                                textInputAction: TextInputAction.next,
-                                textCapitalization: TextCapitalization.words,
-                                onChanged: (value) {
-                                  context.read<FormBloc>().add(UpdateFormEvent(firstName: value));
-                                },
-                              ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: MYInputField(
+                              prefixIcon: const Icon(Icons.person),
+                              hintText: MYTexts.enterFirstName,
+                              maxLines: 1,
+                              maxLength: 32,
+                              labelText: 'First Name',
+                              controller: firstNameController,
+                              keyboardType: TextInputType.name,
+                              textInputAction: TextInputAction.next,
+                              textCapitalization: TextCapitalization.words,
+                              onChanged: (value) {
+                                context.read<FormBloc>().add(UpdateFormEvent(firstName: value));
+                              },
                             ),
-                            horizontalSpace(MySizes.spaceBtwItemsSm.r),
-                            Expanded(
-                              child: MYInputField(
-                                prefixIcon: const Icon(Icons.person),
-                                hintText: MYTexts.enterLastName,
-                                maxLines: 1,
-                                maxLength: 32,
-                                labelText: 'Last Name',
-                                controller: lastNameController,
-                                textInputAction: TextInputAction.next,
-                                textCapitalization: TextCapitalization.words,
-                                onChanged: (value) {
-                                  context.read<FormBloc>().add(UpdateFormEvent(lastName: value));
-                                },
-                              ),
+                          ),
+                          horizontalSpace(MySizes.spaceBtwItemsSm.r),
+                          Expanded(
+                            child: MYInputField(
+                              prefixIcon: const Icon(Icons.person),
+                              hintText: MYTexts.enterLastName,
+                              maxLines: 1,
+                              maxLength: 32,
+                              labelText: 'Last Name',
+                              keyboardType: TextInputType.name,
+                              controller: lastNameController,
+                              textInputAction: TextInputAction.next,
+                              textCapitalization: TextCapitalization.words,
+                              onChanged: (value) {
+                                context.read<FormBloc>().add(UpdateFormEvent(lastName: value));
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
 
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        MYInputField(
-                          prefixIcon: const Icon(Icons.person_2),
-                          hintText: MYTexts.fatherFirstName,
-                          maxLines: 1,
-                          maxLength: 32,
-                          labelText: "Father's Name",
-                          controller: fatherNameController,
-                          textInputAction: TextInputAction.next,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (value) {
-                            context.read<FormBloc>().add(UpdateFormEvent(fatherName: value));
-                          },
-                        ),
+                      verticalSpace(MySizes.spaceBtwItems.r),
+                      MYInputField(
+                        prefixIcon: const Icon(Icons.person_2),
+                        hintText: MYTexts.fatherFirstName,
+                        maxLines: 1,
+                        maxLength: 32,
+                        labelText: "Father's Name",
+                        keyboardType: TextInputType.name,
+                        controller: fatherNameController,
+                        textInputAction: TextInputAction.next,
+                        textCapitalization: TextCapitalization.words,
+                        onChanged: (value) {
+                          context.read<FormBloc>().add(UpdateFormEvent(fatherName: value));
+                        },
+                      ),
 
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        MYInputField(
-                          controller: mobileController,
-                          readOnly: true,
-                          prefixIcon: const Icon(Icons.phone),
-                          keyboardType: TextInputType.number,
-                        ),
+                      verticalSpace(MySizes.spaceBtwItems.r),
+                      MYInputField(
+                        controller: mobileController,
+                        readOnly: true,
+                        prefixIcon: const Icon(Icons.phone),
+                        keyboardType: TextInputType.number,
+                      ),
 
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        MYInputField(
-                          prefixIcon: const Icon(Icons.email),
-                          hintText: MYTexts.enterEmail,
-                          labelText: 'Email Address',
-                          maxLines: 1,
-                          maxLength: 64,
-                          controller: emailController,
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.emailAddress,
-                          onChanged: (value) {
-                            context.read<FormBloc>().add(UpdateFormEvent(email: value));
-                          },
-                        ),
+                      verticalSpace(MySizes.spaceBtwItems.r),
+                      MYInputField(
+                        prefixIcon: const Icon(Icons.email),
+                        hintText: MYTexts.enterEmail,
+                        labelText: 'Email Address',
+                        maxLines: 1,
+                        maxLength: 64,
+                        controller: emailController,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: (value) {
+                          context.read<FormBloc>().add(UpdateFormEvent(email: value));
+                        },
+                      ),
 
-                        verticalSpace(MySizes.spaceBtwItems.r),
-                        DateOfBirthPicker(
-                          selectedDate: formState.dob,
-                          onDateSelected: (date) {
-                            context.read<FormBloc>().add(UpdateFormEvent(dob: date));
-                          },
-                        ),
+                      verticalSpace(MySizes.spaceBtwItems.r),
+                      DateOfBirthPicker(
+                        selectedDate: formState.dob,
+                        onDateSelected: (date) {
+                          print(date);
+                          context.read<FormBloc>().add(UpdateFormEvent(dob: date));
+                        },
+                      ),
 
-                        verticalSpace(MySizes.spaceBtwSections.r),
-                        CustomChoiceChipList(
-                          question: MYTexts.gender,
-                          options: genderOptions,
-                          groupValue: formState.gender,
-                          onChanged: (value) {
-                            context.read<FormBloc>().add(UpdateFormEvent(gender: value));
-                          },
-                        ),
+                      verticalSpace(MySizes.spaceBtwSections.r),
+                      CustomChoiceChipList(
+                        question: MYTexts.gender,
+                        options: genderOptions,
+                        groupValue: formState.gender,
+                        onChanged: (value) {
+                          context.read<FormBloc>().add(UpdateFormEvent(gender: value));
+                        },
+                      ),
 
-                        verticalSpace(MySizes.spaceBtwSections.r),
-                        CustomChoiceChipList(
-                          question: MYTexts.workExperience,
-                          options: experienceOptions,
-                          groupValue: formState.experience,
-                          onChanged: (value) {
-                            context.read<FormBloc>().add(UpdateFormEvent(experience: value));
-                          },
-                        ),
-                      ],
-                    ),
+                      verticalSpace(MySizes.spaceBtwSections.r),
+                      CustomChoiceChipList(
+                        question: MYTexts.workExperience,
+                        options: experienceOptions,
+                        groupValue: formState.experience,
+                        onChanged: (value) {
+                          context.read<FormBloc>().add(UpdateFormEvent(experience: value));
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),

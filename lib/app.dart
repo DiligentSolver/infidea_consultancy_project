@@ -71,10 +71,9 @@ class MyApp extends StatelessWidget {
                 themeMode: ThemeMode.system,
                 home: BlocListener<AuthBloc, AuthState>(
                   listener: (context, state) {
-                    print(state);
                     if (state is Authenticated) {
                       Navigator.pushReplacementNamed(
-                        context,'/profileData');
+                        context,'/homeScreen');
                     } else if (state is Unauthenticated) {
                       if (isFirstLaunch) {
                         Navigator.pushReplacementNamed(

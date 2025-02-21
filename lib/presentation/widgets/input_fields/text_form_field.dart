@@ -76,7 +76,7 @@ class _MYInputFieldState extends State<MYInputField> {
       cursorWidth: 3,
       cursorHeight: MySizes.titleSmall,
       cursorOpacityAnimates: true,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: AutovalidateMode.disabled,
       autofocus: widget.autofocus,
       readOnly: widget.readOnly,
       onSaved: widget.onSaved,

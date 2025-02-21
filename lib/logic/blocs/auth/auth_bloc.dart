@@ -19,6 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<EmailVerifySendOtpEvent>(_onEmailVerifySendOtp);
     on<EmailVerifyResendOtpEvent>(_onEmailVerifyResendOtp);
     on<CheckAppStatusEvent>(_onCheckAppStatus);
+    on<RegisterNewUserFormEvent>(_onRegisterNewUserForm);
   }
 
   Future<void> _onCheckAppStatus(CheckAppStatusEvent event,
@@ -140,6 +141,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final user = await authRepository.registerNewUser(event.userModel);
       if (user == null) return emit(AuthError("Invalid OTP"));
+
+      emit(Authenticated(user));
+    } catch (e) {
+      await _emitErrorState(e, emit);
+    }
+  }
+
+  Future<void> _onRegisterNewUserForm(RegisterNewUserFormEvent event,
+      Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    if (!(await _isConnected())) {
+      return emit(NoInternetState());
+    }
+
+    try {
+      final user = await authRepository.registerNewUserForm(event.formData);
+      if (user == null) return emit(AuthError("Problem with registering user"));
+
+      print(user.fatherName);
 
       emit(Authenticated(user));
     } catch (e) {

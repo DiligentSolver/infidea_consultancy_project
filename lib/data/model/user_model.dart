@@ -7,9 +7,9 @@ class UserModel {
   final String? lastName;
   final String? fatherName;
   final String? dob;
-  final int? calculatedAge;
   final String? gender;
   final String? experience;
+  final String? state;
   final List<ExperienceDetail>? experienceDetails;
   final String? currentCity;
   final String? currentLocality;
@@ -32,11 +32,6 @@ class UserModel {
   final String? workMode;
   final String? noticePeriod;
   final bool? willingToRelocate;
-  final bool? isAdmin;
-  final bool? isVerified;
-  final bool? isEmployer;
-  final bool? isEmailVerified;
-  final DateTime? otpExpiry;
   final Location? location;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -50,9 +45,9 @@ class UserModel {
     this.lastName,
     this.fatherName,
     this.dob,
-    this.calculatedAge,
     this.gender,
     this.experience,
+    this.state,
     this.experienceDetails,
     this.currentCity,
     this.currentLocality,
@@ -75,11 +70,6 @@ class UserModel {
     this.workMode,
     this.noticePeriod,
     this.willingToRelocate,
-    this.isAdmin,
-    this.isVerified,
-    this.isEmployer,
-    this.isEmailVerified,
-    this.otpExpiry,
     this.location,
     this.createdAt,
     this.updatedAt,
@@ -97,12 +87,12 @@ class UserModel {
         lastName: userData?['lastName'],
         fatherName: userData?['fatherName'],
         dob: userData?['dob'],
-        calculatedAge: userData?['calculatedAge'],
         gender: userData?['gender'],
         experience: userData?['experience'],
         experienceDetails: (userData?['experienceDetails'] as List?)
             ?.map((x) => ExperienceDetail.fromJson(x))
             .toList(),
+        state: userData?['state'],
         currentCity: userData?['currentCity'],
         currentLocality: userData?['currentLocality'],
         preferredCities: (userData?['preferredCities'] as List?)
@@ -132,13 +122,6 @@ class UserModel {
         workMode: userData?['workMode'],
         noticePeriod: userData?['noticePeriod'],
         willingToRelocate: userData?['willingToRelocate'],
-        isAdmin: userData?['isAdmin'],
-        isVerified: userData?['isVerified'],
-        isEmployer: userData?['isEmployer'],
-        isEmailVerified: userData?['isEmailVerified'],
-        otpExpiry: userData?['otpExpiry'] != null
-            ? DateTime.tryParse(userData?['otpExpiry'])
-            : null,
         location: userData?['location'] != null
             ? Location.fromJson(userData?['location'])
             : null,
@@ -156,43 +139,38 @@ class UserModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'mobile': mobile,
-      'email': email,
-      'firstName': firstName,
-      'lastName': lastName,
-      'fatherName': fatherName,
-      'dob': dob,
-      'calculatedAge': calculatedAge,
-      'gender': gender,
-      'experience': experience,
-      'experienceDetails': experienceDetails?.map((x) => x.toJson()).toList(),
-      'currentCity': currentCity,
-      'currentLocality': currentLocality,
-      'preferredCities': preferredCities?.map((x) => x.toJson()).toList(),
-      'skills': skills,
-      'languagesKnown': languagesKnown,
-      'currentAddress': currentAddress,
-      'education': education?.map((x) => x.toJson()).toList(),
-      'certifications': certifications?.map((x) => x.toJson()).toList(),
-      'resume': resume,
-      'passportPhoto': passportPhoto,
-      'portfolio': portfolio,
-      'linkedInId': linkedInId,
-      'about': about,
-      'projects': projects?.map((x) => x.toJson()).toList(),
-      'expectedSalary': expectedSalary,
-      'jobType': jobType,
-      'industry': industry,
-      'preferredRoles': preferredRoles,
-      'workMode': workMode,
-      'noticePeriod': noticePeriod,
-      'willingToRelocate': willingToRelocate,
-      'isAdmin': isAdmin,
-      'isVerified': isVerified,
-      'isEmployer': isEmployer,
-      'isEmailVerified': isEmailVerified,
-      'otpExpiry': otpExpiry?.toIso8601String(),
-      'location': location?.toJson(),
+      'mobile': mobile??'',
+      'email': email??'',
+      'firstName': firstName??'',
+      'lastName': lastName??'',
+      'fatherName': fatherName??'',
+      'dob': dob??'',
+      'gender': gender??'',
+      'experience': experience??'',
+      'state': state??'',
+      'experienceDetails': experienceDetails?.map((x) => x.toJson()).toList()??'',
+      'currentCity': currentCity??'',
+      'currentLocality': currentLocality??'',
+      'preferredCities': preferredCities?.map((x) => x.toJson()).toList()??'',
+      'skills': skills??'',
+      'languagesKnown': languagesKnown??'',
+      'currentAddress': currentAddress??'',
+      'education': education?.map((x) => x.toJson()).toList()??'',
+      'certifications': certifications?.map((x) => x.toJson()).toList()??'',
+      'resume': resume??'',
+      'passportPhoto': passportPhoto??'',
+      'portfolio': portfolio??'',
+      'linkedInId': linkedInId??'',
+      'about': about??'',
+      'projects': projects?.map((x) => x.toJson()).toList()??'',
+      'expectedSalary': expectedSalary??'',
+      'jobType': jobType??'',
+      'industry': industry??'',
+      'preferredRoles': preferredRoles??'',
+      'workMode': workMode??'',
+      'noticePeriod': noticePeriod??'',
+      'willingToRelocate': willingToRelocate??'',
+      'location': location?.toJson()??'',
     };
   }
 }

@@ -51,6 +51,13 @@ class RegisterNewUserEvent extends AuthEvent {
   List<Object?> get props => [userModel];
 }
 
+class RegisterNewUserFormEvent extends AuthEvent{
+  final Map<String,dynamic> formData;
+  RegisterNewUserFormEvent(this.formData);
+  @override
+  List<Object?> get props => [formData];
+}
+
 class ResendOtpEvent extends AuthEvent {
   final String mobile;
 

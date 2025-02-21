@@ -85,7 +85,7 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         listener: (context, state) {
                           if (state is Authenticated) {
                             Navigator.pushNamedAndRemoveUntil(
-                                context, '/profileData', (route) => false);
+                                context, '/homeScreen', (route) => false);
                           }else if(state is NewUserState){
                             Navigator.pushNamedAndRemoveUntil(
                                 context, '/stepOneCollection', (route) => false);

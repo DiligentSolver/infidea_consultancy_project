@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:infidea_consultancy_app/data/model/user_model.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/utils/constants/texts.dart';
 
@@ -12,6 +15,11 @@ class UserFormState extends Equatable {
   final DateTime? dob;
   final String? gender;
   final String? experience;
+  final List<Map<String, dynamic>>? states;
+  final List<String>? cities;
+  final List<String>? metroCities;
+  final List<String>? indoreLocalities;
+  final String? state;
   final String? currentCity;
   final String? currentLocality;
   final List<String>? preferredCities;
@@ -33,6 +41,8 @@ class UserFormState extends Equatable {
   final String? postGraduateUniversity;
   final String? postGraduateBranch;
   final String? postGraduateGrade;
+ final File? imageFile;
+  final File? resumeFile;
 
   const UserFormState({
     this.firstName,
@@ -43,6 +53,7 @@ class UserFormState extends Equatable {
     this.dob,
     this.gender,
     this.experience,
+    this.state,
     this.currentCity,
     this.currentLocality,
     this.preferredCities,
@@ -64,6 +75,10 @@ class UserFormState extends Equatable {
     this.postGraduateUniversity,
     this.postGraduateBranch,
     this.postGraduateGrade,
+    this.imageFile,
+    this.resumeFile,
+    this.indoreLocalities,
+    this.metroCities,this.cities,this.states,
   });
 
   factory UserFormState.initial() {
@@ -75,6 +90,7 @@ class UserFormState extends Equatable {
       mobile: null,
       dob: null,
       gender: null,
+      state: null,
       experience: null,
       currentCity: null,
       currentLocality: null,
@@ -97,6 +113,12 @@ class UserFormState extends Equatable {
       postGraduateUniversity: null,
       postGraduateBranch: null,
       postGraduateGrade: null,
+      resumeFile: null,
+      imageFile: null,
+      indoreLocalities: null,
+      cities: null,
+      metroCities: null,
+      states: null,
     );
   }
 
@@ -109,6 +131,11 @@ class UserFormState extends Equatable {
     DateTime? dob,
     String? gender,
     String? experience,
+    List<Map<String, dynamic>>? states,
+    List<String>? cities,
+    List<String>? metroCities,
+    List<String>? indoreLocalities,
+    String? state,
     String? currentCity,
     String? currentLocality,
     List<String>? preferredCities,
@@ -130,6 +157,8 @@ class UserFormState extends Equatable {
     String? postGraduateUniversity,
     String? postGraduateBranch,
     String? postGraduateGrade,
+    File? imageFile,
+    File? resumeFile,
   }) {
     return UserFormState(
       firstName: firstName ?? this.firstName,
@@ -140,6 +169,7 @@ class UserFormState extends Equatable {
       dob: dob ?? this.dob,
       gender: gender ?? this.gender,
       experience: experience ?? this.experience,
+      state: state ?? this.state,
       currentCity: currentCity ?? this.currentCity,
       currentLocality: currentLocality ?? this.currentLocality,
       preferredCities: preferredCities ?? this.preferredCities,
@@ -162,6 +192,12 @@ class UserFormState extends Equatable {
       postGraduateUniversity: postGraduateUniversity??this.postGraduateUniversity,
       postGraduateBranch: postGraduateBranch??this.postGraduateBranch,
       postGraduateGrade: postGraduateGrade??this.postGraduateGrade,
+      imageFile: imageFile??this.imageFile,
+      resumeFile: resumeFile??this.resumeFile,
+      indoreLocalities: indoreLocalities??this.indoreLocalities,
+      states: states??this.states,
+      cities: cities??this.cities,
+      metroCities: metroCities??this.metroCities
     );
   }
 
@@ -176,7 +212,7 @@ class UserFormState extends Equatable {
   }
 
   bool isStepTwoValid() {
-    return (currentCity == 'indore' || currentCity == 'Indore' ? currentLocality != null : true) &&
+    return (state!=null&&currentCity == 'indore' || currentCity == 'Indore' ? currentLocality != null : true) &&
         preferredCities != null && preferredCities!.isNotEmpty && languages != null && languages!.isNotEmpty;
   }
 
@@ -194,8 +230,8 @@ class UserFormState extends Equatable {
       if (graduateEndYear == null || graduateEndYear!.isEmpty) return false;
 
       // Ensure Start Year is before End Year
-      if (int.tryParse(graduateStartYear!) != null &&
-          int.tryParse(graduateEndYear!) != null) {
+      if (graduateStartYear != null &&
+          graduateEndYear != null) {
         if (int.parse(graduateStartYear!) >= int.parse(graduateEndYear!)) {
           return false;
         }
@@ -231,7 +267,9 @@ class UserFormState extends Equatable {
     return true;
   }
 
-
+  bool isStepFourValid() {
+    return imageFile != null && resumeFile!=null;
+  }
 
   bool isStepFiveValid() {
     return selectedRoles != null && selectedRoles!.isNotEmpty;
@@ -244,92 +282,48 @@ class UserFormState extends Equatable {
 
   // Add the toJson method here
   Map<String, dynamic> toJson() {
+
+    String formattedDOB = DateFormat('dd/MM/yyyy').format(dob!);
+
     return {
-      'firstName': firstName,
-      'lastName': lastName,
-      'fatherName': fatherName,
-      'email': email,
-      'mobile': mobile,
-      'dob': dob.toString(),
-      'gender': gender,
-      'experience': experience,
-      'currentCity': currentCity,
-      'currentLocality': currentCity=='indore'||currentCity=='Indore'? currentLocality:null,
-      'preferredCities': preferredCities,
-      'languagesKnown': languages,
-      'selectedRoles': selectedRoles,
+      'firstName': firstName ?? '',
+      'lastName': lastName ?? '',
+      'fatherName': fatherName ?? '' ,
+      'email': email?? '',
+      'mobile': mobile?? '',
+      'dob': formattedDOB?? '',
+      'gender': gender?? '',
+      'experience': experience?? '',
+      'currentCity': currentCity?? '',
+      'currentLocality': currentCity=='indore'||currentCity=='Indore'? currentLocality:''?? '',
+      'preferredCities': preferredCities?.map((city) => {"city": city}).toList()??'',
+      'languagesKnown': languages?? '',
+      'selectedRoles': selectedRoles?? '',
       'education': Education(
-              degree: graduateDegree,
-              college: graduateCollege ,
-              university: graduateUniversity,
-              passingYear: graduateEndYear,
-              startingYear: graduateStartYear,
-              grade: graduateGrade,
-              branch: graduateBranch,
-              isCurrentlyStudying: isCurrentlyStudying,
-              educationLevel: educationLevel,
-              postgraduateDegree: postGraduateDegree,
-              postgraduateCollege: postGraduateCollege,
-              postgraduateUniversity: postGraduateUniversity,
-              postgraduatePassingYear: postGraduateEndYear,
-              postgraduateStartingYear: postGraduateStartYear,
-              postgraduateGrade: postGraduateGrade,
-              postgraduateBranch: postGraduateBranch)
+              degree: graduateDegree?? '',
+              college: graduateCollege ?? '',
+              university: graduateUniversity?? '',
+              passingYear: graduateEndYear?? '',
+              startingYear: graduateStartYear?? '',
+              grade: graduateGrade?? '',
+              branch: graduateBranch?? '',
+              isCurrentlyStudying: isCurrentlyStudying ?? false,
+              educationLevel: educationLevel?? '',
+              postgraduateDegree: postGraduateDegree?? '',
+              postgraduateCollege: postGraduateCollege?? '',
+              postgraduateUniversity: postGraduateUniversity?? '',
+              postgraduatePassingYear: postGraduateEndYear?? '',
+              postgraduateStartingYear: postGraduateStartYear?? '',
+              postgraduateGrade: postGraduateGrade?? '',
+              postgraduateBranch: postGraduateBranch?? '')
           .toJson(),
-    };
-  }
-
-  // Add the toJson method here
-  Map<String, dynamic> toUserModelJson() {
-
-    final education = [
-    {
-    'degree': graduateDegree,
-    'college': graduateCollege,
-    'university': graduateUniversity,
-    'passingYear': graduateEndYear,
-    'startingYear': graduateStartYear,
-    'grade': graduateGrade,
-    'branch': graduateBranch,
-    'educationLevel': educationLevel,
-    'isCurrentlyStudying': isCurrentlyStudying,
-    'postgraduateDegree': postGraduateDegree,
-    'postgraduateCollege': postGraduateCollege,
-    'postgraduateUniversity': postGraduateUniversity,
-    'postgraduateStartingYear': postGraduateStartYear,
-    'postgraduatePassingYear': postGraduateEndYear,
-    'postgraduateGrade': postGraduateGrade,
-    'postgraduateBranch': postGraduateBranch
-    }
-    ];
-
-
-
-    List<Map<String, dynamic>>? formattedCities = preferredCities?.map((city) =>
-        PreferredCity(city: city).toJson()
-    ).toList();
-
-    return {
-      'firstName': firstName,
-      'lastName': lastName,
-      'fatherName': fatherName,
-      'email': email,
-      'mobile': mobile,
-      'dob': dob.toString(),
-      'gender': gender,
-      'experience': experience,
-      'currentCity': currentCity,
-      'currentLocality': currentCity=='indore'||currentCity=='Indore'? currentLocality:null,
-      'preferredCities': formattedCities,
-      'languagesKnown': languages,
-      'selectedRoles': selectedRoles,
-      'education': education,
+      'state':state
     };
   }
 
   double calculateProgress() {
     int filledFields = 0;
-    int totalFields = 14; // Step One + Step Two + Step Three + Step Four + Step Five
+    int totalFields = 17; // Step One + Step Two + Step Three + Step Four + Step Five
 
     // Step One Fields
     if (firstName?.isNotEmpty ?? false) filledFields++;
@@ -342,6 +336,7 @@ class UserFormState extends Equatable {
     if (experience != null) filledFields++;
 
     // Step Two Fields
+    if (state != null) filledFields++;
     if (currentCity != null) filledFields++;
     if (preferredCities != null && preferredCities!.isNotEmpty) filledFields++;
     if (languages != null && languages!.isNotEmpty) filledFields++;
@@ -352,7 +347,8 @@ class UserFormState extends Equatable {
     if (educationLevel != null) filledFields++;
 
     //Step Four Fields
-
+    if (imageFile != null) filledFields++;
+    if (resumeFile != null) filledFields++;
 
     // Step Five Fields (Example additional fields)
     if (selectedRoles != null && selectedRoles!.isNotEmpty) filledFields++;
@@ -371,6 +367,7 @@ class UserFormState extends Equatable {
         dob,
         gender,
         experience,
+    state,
         currentCity,
         currentLocality,
         preferredCities,
@@ -385,6 +382,9 @@ class UserFormState extends Equatable {
         postGraduateCollege,
         postGraduateDegree,
         postGraduateStartYear,
-        postGraduateEndYear
+        postGraduateEndYear,
+    resumeFile,
+    imageFile,
+    indoreLocalities,cities,states,metroCities
       ];
 }

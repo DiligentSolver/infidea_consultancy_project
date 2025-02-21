@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/colors.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
-import 'package:infidea_consultancy_app/core/utils/helpers/helper_functions.dart';
 import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/input_fields/text_form_field.dart';
 
+// 1. SingleCustomDropdown
 class SingleCustomDropdown extends StatefulWidget {
-  final List<String> items;
+  final List<dynamic> items;
   final String? selectedItem;
   final String? question;
   final ValueChanged<String>? onSelectionChanged;
+  final String labelKey;
 
   const SingleCustomDropdown({
     super.key,
@@ -18,6 +19,7 @@ class SingleCustomDropdown extends StatefulWidget {
     this.selectedItem,
     this.question,
     this.onSelectionChanged,
+    this.labelKey = "name",
   });
 
   @override
@@ -27,13 +29,99 @@ class SingleCustomDropdown extends StatefulWidget {
 class _SingleCustomDropdownState extends State<SingleCustomDropdown> {
   String? selectedItem;
   TextEditingController searchController = TextEditingController();
-  List<String> filteredItems = [];
+  List<dynamic> filteredItems = [];
 
   @override
   void initState() {
     super.initState();
     selectedItem = widget.selectedItem;
-    filteredItems = List.from(widget.items);
+    updateFilteredItems("");
+  }
+
+  @override
+  void didUpdateWidget(SingleCustomDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items != oldWidget.items) {
+      updateFilteredItems(searchController.text);
+    }
+    if (widget.selectedItem != oldWidget.selectedItem) {
+      selectedItem = widget.selectedItem;
+    }
+  }
+
+  void updateFilteredItems(String query) {
+    filteredItems = widget.items.where((item) {
+      String label = item is Map
+          ? item[widget.labelKey].toString()
+          : item.toString();
+      return label.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+  }
+
+  void _showSingleSelectModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
+              child: SizedBox(
+                height: MySizes.fifty.sh,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MYInputField(
+                      controller: searchController,
+                      hintText: 'Search...',
+                      prefixIcon: const Icon(Icons.search),
+                      onChanged: (query) {
+                        setModalState(() {
+                          updateFilteredItems(query);
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: filteredItems.isNotEmpty
+                          ? ListView.builder(
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+                          String label = item is Map
+                              ? item[widget.labelKey].toString()
+                              : item.toString();
+                          return ListTile(
+                            title: Text(label),
+                            selected: selectedItem == label,
+                            trailing: selectedItem == label
+                                ? const Icon(Icons.check, color: MYColors.secondaryColor)
+                                : null,
+                            onTap: () {
+                              setState(() {
+                                selectedItem = label;
+                              });
+                              widget.onSelectionChanged?.call(label);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      )
+                          : const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text("No results found"),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -70,69 +158,6 @@ class _SingleCustomDropdownState extends State<SingleCustomDropdown> {
           ),
         ),
       ],
-    );
-  }
-
-  /// **Single-selection Modal with Search**
-  void _showSingleSelectModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
-              child: SizedBox(
-                height: MySizes.fifty.sh,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Search Bar
-                    MYInputField(
-                      controller: searchController,
-                      hintText: 'Search...',
-                      prefixIcon: const Icon(Icons.search),
-                      onChanged: (query) {
-                        setModalState(() {
-                          filteredItems = widget.items
-                              .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-                              .toList();
-                        });
-                      },
-                    ),
-
-                    // Single-select list
-                    Expanded(
-                      child: filteredItems.isNotEmpty
-                          ? ListView.builder(
-                        itemCount: filteredItems.length,
-                        itemBuilder: (context, index) {
-                          final item = filteredItems[index];
-                          return ListTile(
-                            title: Text(item),
-                            onTap: () {
-                              setState(() {
-                                selectedItem = item;
-                              });
-                              widget.onSelectionChanged?.call(item);
-                              Navigator.pop(context);
-                            },
-                          );
-                        },
-                      )
-                          : const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text("No results found"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }

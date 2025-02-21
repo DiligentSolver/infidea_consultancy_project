@@ -1,19 +1,21 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
-import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
-import 'package:infidea_consultancy_app/presentation/widgets/input_fields/text_form_field.dart';
+import 'package:infidea_consultancy_app/core/utils/constants/colors.dart';
 
-import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/constants/sizes.dart';
 import '../../../core/utils/helpers/helper_functions.dart';
+import '../../../core/utils/text_styles/text_styles.dart';
+import '../input_fields/text_form_field.dart';
 
 class SingleDropdownSelect extends StatefulWidget {
-  final List<String> items;
+  final List<dynamic> items;
   final String? selectedItem;
   final ValueChanged<String?>? onSelectionChanged;
   final String? question;
   final String? hintText;
   final bool isDown;
+  final String? labelKey;
 
   const SingleDropdownSelect({
     super.key,
@@ -23,6 +25,7 @@ class SingleDropdownSelect extends StatefulWidget {
     this.onSelectionChanged,
     this.question,
     this.hintText,
+    this.labelKey = "name",
   });
 
   @override
@@ -32,18 +35,38 @@ class SingleDropdownSelect extends StatefulWidget {
 class _SingleDropdownSelectState extends State<SingleDropdownSelect> {
   String? selectedItem;
   TextEditingController searchController = TextEditingController();
-  late List<String> filteredItems;
+  List<dynamic> filteredItems = [];
 
   @override
   void initState() {
     super.initState();
     selectedItem = widget.selectedItem;
-    filteredItems = List.from(widget.items);
+    // Initialize filteredItems with all items
+    updateFilteredItems("");
+  }
+
+  @override
+  void didUpdateWidget(SingleDropdownSelect oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items != oldWidget.items) {
+      updateFilteredItems(searchController.text);
+    }
+    if (widget.selectedItem != oldWidget.selectedItem) {
+      selectedItem = widget.selectedItem;
+    }
+  }
+
+  void updateFilteredItems(String query) {
+    filteredItems = widget.items.where((item) {
+      String label = item is Map
+          ? item[widget.labelKey].toString()
+          : item.toString();
+      return label.toLowerCase().contains(query.toLowerCase());
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -62,20 +85,20 @@ class _SingleDropdownSelectState extends State<SingleDropdownSelect> {
             });
             widget.onSelectionChanged?.call(value);
           },
-          offset: Offset(0,widget.isDown ? -MySizes.fourty.sh:10),
+          offset: Offset(0, widget.isDown ? -MySizes.fourty.sh : 10),
           constraints: BoxConstraints(
             maxHeight: MySizes.thirty.sh,
             minWidth: MySizes.ninty.sw,
           ),
           position: PopupMenuPosition.under,
           elevation: MySizes.elevationXl,
-          color: MYAppHelperFunctions.isDarkMode(context)?null:MYColors.lightThemeBg,
+          color: MYAppHelperFunctions.isDarkMode(context) ? null : MYColors.lightThemeBg,
           itemBuilder: (context) => [
             PopupMenuItem(
               enabled: false,
               padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
               child: StatefulBuilder(
-                builder: (context, setState) => Column(
+                builder: (context, setPopupState) => Column(
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -84,27 +107,46 @@ class _SingleDropdownSelectState extends State<SingleDropdownSelect> {
                         hintText: "Search...",
                         prefixIcon: const Icon(Icons.search),
                         onChanged: (query) {
-                          setState(() {
-                            filteredItems = widget.items
-                                .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-                                .toList();
+                          setPopupState(() {
+                            updateFilteredItems(query);
                           });
                         },
                       ),
                     ),
-                    ...filteredItems.map((item) {
-                      final isSelected = selectedItem == item;
-                      return ListTile(
-                        title: Text(item,style: MYAppTextStyles.labelLarge(color: MYAppHelperFunctions.isDarkMode(context)?MYColors.darkTextPrimaryColor:MYColors.textPrimaryColor),),
-                        selected: isSelected,
-                        onTap: () {
-                          Navigator.of(context).pop(item);
-                        },
-                        trailing: isSelected
-                            ? const Icon(Icons.check, color: MYColors.secondaryColor)
-                            : null,
-                      );
-                    }),
+                    if (filteredItems.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          "No items found",
+                          style: MYAppTextStyles.labelLarge(
+                            color: MYColors.grey,
+                          ),
+                        ),
+                      )
+                    else
+                      ...filteredItems.map((item) {
+                        String label = item is Map
+                            ? item[widget.labelKey].toString()
+                            : item.toString();
+                        final isSelected = selectedItem == label;
+                        return ListTile(
+                          title: Text(
+                            label,
+                            style: MYAppTextStyles.labelLarge(
+                              color: MYAppHelperFunctions.isDarkMode(context)
+                                  ? MYColors.darkTextPrimaryColor
+                                  : MYColors.textPrimaryColor,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onTap: () {
+                            Navigator.of(context).pop(label);
+                          },
+                          trailing: isSelected
+                              ? const Icon(Icons.check, color: MYColors.secondaryColor)
+                              : null,
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -124,7 +166,7 @@ class _SingleDropdownSelectState extends State<SingleDropdownSelect> {
                     selectedItem ?? (widget.hintText ?? "Select an option"),
                     overflow: TextOverflow.ellipsis,
                     style: MYAppTextStyles.labelLarge(
-                      color: selectedItem == null ? Colors.grey : null,
+                      color: selectedItem == null ? MYColors.grey : null,
                     ),
                   ),
                 ),

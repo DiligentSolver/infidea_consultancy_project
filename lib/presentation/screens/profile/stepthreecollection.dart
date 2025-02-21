@@ -8,6 +8,7 @@ import 'package:infidea_consultancy_app/logic/blocs/form/form_bloc.dart';
 import 'package:infidea_consultancy_app/logic/blocs/form/form_state.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/drop_down_button/single_drop_down.dart';
 import '../../../core/utils/text_styles/text_styles.dart';
+import '../../../data/repositories/dropdown_repository.dart';
 import '../../../logic/blocs/form/form_event.dart';
 import '../../widgets/buttons/elevated_button.dart';
 import '../../widgets/chips/choice_chip_list.dart';
@@ -38,118 +39,18 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
     "false"
   ];
 
-  final List<String> collegeNames = [
+  final List<String> _collegeNames = [
     "Harvard",
     "MIT",
     "Stanford",
     "Oxford",
     "Cambridge"
   ];
-  final List<String> degreeNames = [
-    // Engineering Degrees
-    "Bachelor of Technology (B.Tech)",
-    "Bachelor of Engineering (B.E.)",
-    "Master of Technology (M.Tech)",
-    "Master of Engineering (M.E.)",
-    "Diploma in Engineering",
 
-    // Medical Degrees
-    "Bachelor of Medicine, Bachelor of Surgery (MBBS)",
-    "Bachelor of Dental Surgery (BDS)",
-    "Bachelor of Ayurvedic Medicine and Surgery (BAMS)",
-    "Bachelor of Unani Medicine and Surgery (BUMS)",
-    "Bachelor of Veterinary Science (B.V.Sc.)",
-    "Bachelor of Physiotherapy (BPT)",
-    "Bachelor of Occupational Therapy (BOT)",
-    "Master of Surgery (MS)",
-    "Doctor of Medicine (MD)",
-    "Master of Dental Surgery (MDS)",
-    "Doctor of Veterinary Medicine (DVM)",
+   List<String> _degreeNames = [
 
-    // Science Degrees
-    "Bachelor of Science (B.Sc.)",
-    "Master of Science (M.Sc.)",
-    "Integrated M.Sc.",
-    "Doctor of Philosophy (Ph.D.)",
-
-    // Arts & Humanities Degrees
-    "Bachelor of Arts (B.A.)",
-    "Master of Arts (M.A.)",
-    "Bachelor of Fine Arts (BFA)",
-    "Master of Fine Arts (MFA)",
-
-    // Commerce & Management Degrees
-    "Bachelor of Commerce (B.Com.)",
-    "Master of Commerce (M.Com.)",
-    "Bachelor of Business Administration (BBA)",
-    "Master of Business Administration (MBA)",
-    "Executive MBA",
-
-    // Law Degrees
-    "Bachelor of Laws (LLB)",
-    "Master of Laws (LLM)",
-    "Integrated BA LLB",
-    "Integrated BBA LLB",
-    "Integrated B.Com LLB",
-
-    // Computer Science & IT Degrees
-    "Bachelor of Computer Applications (BCA)",
-    "Master of Computer Applications (MCA)",
-
-    // Design & Fashion Degrees
-    "Bachelor of Design (B.Des.)",
-    "Master of Design (M.Des.)",
-    "Bachelor of Fashion Technology (B.FTech)",
-    "Master of Fashion Technology (M.FTech)",
-
-    // Hotel & Hospitality Management Degrees
-    "Bachelor of Hotel Management (BHM)",
-    "Master of Hotel Management (MHM)",
-
-    // Agriculture & Forestry Degrees
-    "Bachelor of Science in Agriculture (B.Sc Ag.)",
-    "Master of Science in Agriculture (M.Sc Ag.)",
-    "Bachelor of Fisheries Science (B.F.Sc.)",
-    "Bachelor of Horticulture (B.Sc Horticulture)",
-
-    // Mass Communication & Journalism Degrees
-
-    // Pharmacy Degrees
-    "Bachelor of Pharmacy (B.Pharm.)",
-    "Master of Pharmacy (M.Pharm.)",
-    "Doctor of Pharmacy (Pharm.D)",
-
-    // Architecture Degrees
-    "Bachelor of Architecture (B.Arch.)",
-    "Master of Architecture (M.Arch.)",
-
-    // Teaching & Education Degrees
-    "Bachelor of Education (B.Ed.)",
-    "Master of Education (M.Ed.)",
-    "Diploma in Elementary Education (D.El.Ed)",
-    "Bachelor of Physical Education (B.P.Ed.)",
-
-    // Aviation Degrees
-    "Bachelor of Aviation",
-    "Commercial Pilot License (CPL)",
-
-    // Paramedical Degrees
-    "Bachelor of Science in Nursing (B.Sc Nursing)",
-    "Master of Science in Nursing (M.Sc Nursing)",
-    "Diploma in Medical Laboratory Technology (DMLT)",
-
-    // Social Work & Psychology Degrees
-    "Bachelor of Social Work (BSW)",
-    "Master of Social Work (MSW)",
-    "Bachelor of Psychology",
-    "Master of Psychology",
-
-    // Event Management & Performing Arts
-    "Bachelor of Event Management",
-    "Master of Event Management",
-    "Bachelor of Performing Arts (BPA)",
-    "Master of Performing Arts (MPA)"
   ];
+
   final List<String> years =
       List.generate(71, (index) => (1980 + index).toString());
 
@@ -162,6 +63,19 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
   String? postGraduateDegree;
   String? postGraduateStartYear;
   String? postGraduateEndYear;
+
+  DropdownRepository dropdownRepository = DropdownRepository();
+
+  Future<void> fetchDegrees() async {
+    try {
+      final degrees = await dropdownRepository.getDegrees();
+      setState(() {
+        _degreeNames = degrees;
+      });
+    } catch (e) {
+      print("Error fetching languages: $e");
+    }
+  }
 
   @override
   void initState() {
@@ -188,45 +102,63 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
     required String? selectedEndYear,
     required void Function(String?)? onCollegeChanged,
     required void Function(String?)? onDegreeChanged,
-    required void Function(String?)?  onStartYearChanged,
-    required void Function(String?)?  onEndYearChanged,
+    required void Function(String?)? onStartYearChanged,
+    required void Function(String?)? onEndYearChanged,
+    required UserFormState formState,  // ✅ Added formState as a parameter
   }) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ✅ College Name Dropdown
         SingleDropdownSelect(
           question: MYTexts.collegeName,
-          items: collegeNames,
+          items: _collegeNames,
           selectedItem: selectedCollege,
-          onSelectionChanged:  onCollegeChanged,
+          onSelectionChanged: onCollegeChanged,
           isDown: true,
         ),
         verticalSpace(MySizes.spaceBtwSections.r),
+
+        // ✅ Degree Name Dropdown
         SingleDropdownSelect(
           question: MYTexts.degreeNameLabel,
-          items: degreeNames,
+          items: _degreeNames,
           selectedItem: selectedDegree,
-          onSelectionChanged:  onDegreeChanged,
+          onSelectionChanged: onDegreeChanged,
           isDown: true,
         ),
         verticalSpace(MySizes.spaceBtwSections.r),
+
+        // ✅ Duration (Start Year & End Year)
         RowCustomDropdown(
-            question: "Duration ?",
-            label1: MYTexts.graduateStartYear, label2: MYTexts.graduateEndYear, minValue1: DateTime.now().year-50, maxValue1: DateTime.now().year, minValue2: DateTime.now().year-50, maxValue2: DateTime.now().year+50, onSelected: (startYear,endYear){
-          setState(() {
-            selectedStartYear = startYear.toString();
-            selectedEndYear = endYear.toString();
-          });
-        },
+          question: "Duration?",
+          label1: MYTexts.graduateStartYear,
+          label2: MYTexts.graduateEndYear,
+          minValue1: DateTime.now().year - 50,
+          maxValue1: DateTime.now().year,
+          minValue2: DateTime.now().year - 50,
+          maxValue2: DateTime.now().year + 50,
           isDown: true,
-        )
+          onSelected: (startYear, endYear) {
+            setState(() {
+              formState = formState.copyWith(
+                graduateStartYear: startYear.toString(),
+                graduateEndYear: endYear.toString(),
+              );
+            });
+            onStartYearChanged?.call(startYear.toString());
+            onEndYearChanged?.call(endYear.toString());
+          },
+        ),
       ],
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocConsumer<FormBloc,UserFormState>(
+      child: BlocConsumer<FormBloc, UserFormState>(
         listener: (BuildContext context, UserFormState formState) {
           formState.copyWith(
             isCurrentlyStudying: formState.isCurrentlyStudying,
@@ -240,31 +172,38 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
             postGraduateStartYear: postGraduateStartYear,
             postGraduateEndYear: postGraduateEndYear,
           );
-          // print(formState.isCurrentlyStudying);
-          print(formState.educationLevel);
+
+          // ✅ Fetch Degrees only if education level is "Graduate"
+          if (formState.educationLevel == MYTexts.graduate) {
+            fetchDegrees();
+          }
         },
-        builder: (context,formState){
+        builder: (context, formState) {
           final formBloc = context.read<FormBloc>();
+
           return Scaffold(
-          bottomNavigationBar: BottomAppBar(
-            child: MYElevatedButton(
-              onPressed: () => _validateAndProceed(),
-              child: const Text(MYTexts.next),
+            bottomNavigationBar: BottomAppBar(
+              child: MYElevatedButton(
+                onPressed: () => _validateAndProceed(),
+                child: const Text(MYTexts.next),
+              ),
             ),
-          ),
-          appBar: AppBar(
+            appBar: AppBar(
               title: Row(
                 children: [
-                  Expanded(child: CustomLinearProgressIndicator(progress: formState.calculateProgress())),
+                  Expanded(
+                    child: CustomLinearProgressIndicator(
+                      progress: formState.calculateProgress(),
+                    ),
+                  ),
                   horizontalSpace(MySizes.spaceBtwItems.r),
                   const Text("Page: 3/5"),
                 ],
-              )
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
-              child: Center(
+              ),
+            ),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -293,12 +232,13 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
                       },
                     ),
                     verticalSpace(MySizes.spaceBtwSections.r),
+
+                    // ✅ Show Degree Details only for "Graduate"
                     if (formState.educationLevel == MYTexts.graduate ||
                         formState.educationLevel == MYTexts.postGraduate) ...[
                       Text(
                         MYTexts.graduateDetails,
-                        style: MYAppTextStyles.titleLarge(
-                            fontWeight: FontWeight.bold),
+                        style: MYAppTextStyles.titleLarge(fontWeight: FontWeight.bold),
                       ),
                       verticalSpace(MySizes.spaceBtwItems.r),
                       _buildDegreeDetailsSection(
@@ -307,26 +247,28 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
                         selectedDegree: formState.graduateDegree,
                         selectedStartYear: formState.graduateStartYear,
                         selectedEndYear: formState.graduateEndYear,
+                        formState: formState, // ✅ Pass formState
                         onCollegeChanged: (val) {
                           formBloc.add(UpdateFormEvent(graduateCollege: val));
-                        } ,
+                        },
                         onDegreeChanged: (val) {
                           formBloc.add(UpdateFormEvent(graduateDegree: val));
                         },
                         onStartYearChanged: (val) {
                           formBloc.add(UpdateFormEvent(graduateStartYear: val));
-                        } ,
+                        },
                         onEndYearChanged: (val) {
                           formBloc.add(UpdateFormEvent(graduateEndYear: val));
-                        } ,
+                        },
                       ),
                     ],
                     verticalSpace(MySizes.spaceBtwSections.r),
+
+                    // ✅ Show Post Graduate Section only for "Post Graduate"
                     if (formState.educationLevel == MYTexts.postGraduate) ...[
                       Text(
                         MYTexts.postGraduateDetails,
-                        style: MYAppTextStyles.titleLarge(
-                            fontWeight: FontWeight.bold),
+                        style: MYAppTextStyles.titleLarge(fontWeight: FontWeight.bold),
                       ),
                       verticalSpace(MySizes.spaceBtwItems.r),
                       _buildDegreeDetailsSection(
@@ -337,26 +279,28 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
                         selectedEndYear: formState.postGraduateEndYear,
                         onCollegeChanged: (val) {
                           formBloc.add(UpdateFormEvent(postGraduateCollege: val));
-                        } ,
+                        },
                         onDegreeChanged: (val) {
                           formBloc.add(UpdateFormEvent(postGraduateDegree: val));
                         },
                         onStartYearChanged: (val) {
                           formBloc.add(UpdateFormEvent(postGraduateStartYear: val));
-                        } ,
+                        },
                         onEndYearChanged: (val) {
                           formBloc.add(UpdateFormEvent(postGraduateEndYear: val));
-                        } ,
+                        },
+                        formState: formState,
                       ),
-                      verticalSpace(MySizes.spaceBtwSectionsLg.r)
+                      verticalSpace(MySizes.spaceBtwSectionsLg.r),
                     ],
                   ],
                 ),
               ),
             ),
-          ),
-        );},
+          );
+        },
       ),
     );
   }
+
 }

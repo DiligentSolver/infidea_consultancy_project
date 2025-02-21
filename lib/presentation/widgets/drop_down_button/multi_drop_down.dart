@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/colors.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
 import 'package:infidea_consultancy_app/core/utils/helpers/helper_functions.dart';
@@ -8,21 +7,24 @@ import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart'
 import 'package:infidea_consultancy_app/presentation/widgets/input_fields/text_form_field.dart';
 
 class MultiDropdownSelect extends StatefulWidget {
-  final List<String> items;
+  final List<dynamic> items;
   final List<String> selectedItems;
   final ValueChanged<List<String>>? onSelectionChanged;
   final int maxSelection;
   final String? question;
   final bool isDown, isHint;
+  final String labelKey; // Key for displaying labels
 
   const MultiDropdownSelect({
     super.key,
     required this.items,
-    this.isDown = false,this.isHint=true,
+    this.isDown = false,
+    this.isHint = true,
     this.selectedItems = const [],
     this.onSelectionChanged,
     required this.maxSelection,
     this.question,
+    this.labelKey = "name", // Default key for labels
   });
 
   @override
@@ -32,19 +34,38 @@ class MultiDropdownSelect extends StatefulWidget {
 class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
   late List<String> selectedItems;
   TextEditingController searchController = TextEditingController();
-  late List<String> filteredItems;
+  List<dynamic> filteredItems = [];
   bool isOpened = false;
 
   @override
   void initState() {
     super.initState();
     selectedItems = List.from(widget.selectedItems);
-    filteredItems = List.from(widget.items);
+    updateFilteredItems("");
+  }
+
+  @override
+  void didUpdateWidget(MultiDropdownSelect oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items != oldWidget.items) {
+      updateFilteredItems(searchController.text);
+    }
+    if (widget.selectedItems != oldWidget.selectedItems) {
+      selectedItems = List.from(widget.selectedItems);
+    }
+  }
+
+  void updateFilteredItems(String query) {
+    filteredItems = widget.items.where((item) {
+      String label = item is Map
+          ? item[widget.labelKey].toString()
+          : item.toString();
+      return label.toLowerCase().contains(query.toLowerCase());
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,26 +78,25 @@ class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
             ),
           ),
         PopupMenuButton<String>(
-          onCanceled: (){
+          onCanceled: () {
             setState(() {
               isOpened = false;
             });
           },
-          onOpened: (){
+          onOpened: () {
             setState(() {
               isOpened = true;
             });
           },
-          onSelected:(_) {},
-          offset: Offset(0,widget.isDown ? -MySizes.fourty.sh:10),
+          onSelected: (_) {},
+          offset: Offset(0, widget.isDown ? -MySizes.fourty.sh : 10),
           constraints: BoxConstraints(
             maxHeight: MySizes.thirty.sh,
-            // Set minimum width to screen width
             minWidth: MySizes.ninty.sw,
           ),
           position: PopupMenuPosition.under,
           elevation: MySizes.elevationXl,
-          color: MYAppHelperFunctions.isDarkMode(context)?null:MYColors.lightThemeBg,
+          color: MYAppHelperFunctions.isDarkMode(context) ? null : MYColors.lightThemeBg,
           itemBuilder: (context) => [
             PopupMenuItem(
               enabled: false,
@@ -90,30 +110,41 @@ class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
                       prefixIcon: const Icon(Icons.search),
                       onChanged: (query) {
                         setState(() {
-                          filteredItems = widget.items
-                              .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-                              .toList();
+                          filteredItems = widget.items.where((item) {
+                            String label = item is Map
+                                ? item[widget.labelKey].toString()
+                                : item.toString();
+                            return label.toLowerCase().contains(query.toLowerCase());
+                          }).toList();
                         });
                       },
                     ),
                     ...filteredItems.map((item) {
-                      final isSelected = selectedItems.contains(item);
+                      String label = item is Map ? item[widget.labelKey].toString() : item.toString();
+                      final isSelected = selectedItems.contains(label);
+
                       return CheckboxListTile(
                         value: isSelected,
-                        title: Text(item,style: MYAppTextStyles.labelLarge(color: MYAppHelperFunctions.isDarkMode(context)?MYColors.darkTextPrimaryColor:MYColors.textPrimaryColor),),
+                        title: Text(
+                          label,
+                          style: MYAppTextStyles.labelLarge(
+                            color: MYAppHelperFunctions.isDarkMode(context)
+                                ? MYColors.darkTextPrimaryColor
+                                : MYColors.textPrimaryColor,
+                          ),
+                        ),
                         onChanged: (checked) {
                           setState(() {
                             if (checked == true) {
                               if (selectedItems.length < widget.maxSelection) {
-                                selectedItems.add(item);
+                                selectedItems.add(label);
                               }
                             } else {
-                              selectedItems.remove(item);
+                              selectedItems.remove(label);
                             }
                           });
                           // Update parent state
-                          this.setState(() {
-                          });
+                          this.setState(() {});
                           widget.onSelectionChanged?.call(List.from(selectedItems));
                         },
                       );
@@ -126,7 +157,7 @@ class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color:MYColors.secondarylighterColor),
+              border: Border.all(color: MYColors.secondarylighterColor),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -136,17 +167,25 @@ class _MultiDropdownSelectState extends State<MultiDropdownSelect> {
                   child: Text(
                     selectedItems.isEmpty
                         ? "You can select up to ${widget.maxSelection}"
-                        : widget.isHint ? selectedItems.join(", "): "You can select up to ${widget.maxSelection}",
+                        : widget.isHint
+                        ? selectedItems.join(", ")
+                        : "You can select up to ${widget.maxSelection}",
                     overflow: TextOverflow.ellipsis,
                     style: MYAppTextStyles.labelLarge(),
                   ),
                 ),
-                Icon(isOpened ? Icons.close:Icons.arrow_drop_down),
+                Icon(isOpened ? Icons.close : Icons.arrow_drop_down),
               ],
             ),
           ),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }

@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infidea_consultancy_app/data/model/user_model.dart';
+import 'package:infidea_consultancy_app/data/repositories/dropdown_repository.dart';
 import 'package:infidea_consultancy_app/logic/blocs/auth/auth_bloc.dart';
 import '../auth/auth_event.dart';
 import 'form_event.dart';
@@ -20,14 +23,16 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
 
   Future<void> _onLoadFormData(
       LoadFormData event, Emitter<UserFormState> emit) async {
-    final responseData = await authRepository.getSavedUserData();
+    final Object? responseData = await authRepository.getSavedUserData();
+
     final UserModel userData =
-    UserModel.fromJson(responseData as Map<String, dynamic>);
+    UserModel.fromJson(responseData as Map<String,dynamic>);
 
     emit(state.copyWith(
       mobile: userData.mobile,
     ));
   }
+
 
 
   void _onUpdateForm(UpdateFormEvent event, Emitter<UserFormState> emit) {
@@ -40,6 +45,7 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
       dob: event.dob ?? state.dob,
       gender: event.gender ?? state.gender,
       experience: event.experience ?? state.experience,
+      state: event.state??state.state,
       currentCity: event.currentCity ?? state.currentCity,
       currentLocality: event.currentLocality ?? state.currentLocality,
       preferredCities: event.preferredCities ?? state.preferredCities,
@@ -65,6 +71,12 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
           event.postGraduateUniversity ?? state.postGraduateUniversity,
       postGraduateBranch: event.postGraduateBranch ?? state.postGraduateBranch,
       postGraduateGrade: event.postGraduateGrade ?? state.postGraduateGrade,
+      imageFile: event.imageFile??state.imageFile,
+      resumeFile: event.resumeFile??state.resumeFile,
+        cities: event.cities??state.cities,
+        metroCities: event.metroCities??state.metroCities,
+        states: event.states??state.states,
+        indoreLocalities: event.indoreLocalities??state.indoreLocalities,
     ));
   }
 
@@ -74,15 +86,10 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
   }
 
   Future<void> _onCompleteForm(
-      CompleteForm event,
-      Emitter<UserFormState> emit,
-      ) async {
+      CompleteForm event, Emitter<UserFormState> emit) async {
     if (state.isComplete()) {
-      // Convert the state to UserModel
-      final userModel = UserModel.fromJson({'user':state.toUserModelJson()});
-      // Ensure AuthBloc is injected properly instead of using context.read
-      final authBloc = AuthBloc(authRepository); // Pass AuthBloc as a dependency to this bloc
-      authBloc.add(RegisterNewUserEvent(userModel));
+      final authBloc = BlocProvider.of<AuthBloc>(event.context); // ✅ Get existing AuthBloc
+      authBloc.add(RegisterNewUserFormEvent(state.toJson()));
     }
   }
 

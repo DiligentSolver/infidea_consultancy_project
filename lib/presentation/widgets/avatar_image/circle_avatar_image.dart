@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:infidea_consultancy_app/core/utils/constants/colors.dart';
 import 'dart:io';
 
+import 'package:infidea_consultancy_app/core/utils/constants/colors.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/circular_icon/custom_circular_icon.dart';
 
@@ -13,17 +13,18 @@ class MYEditableProfileImage extends StatefulWidget {
     this.width = 200,
     this.height = 200,
     this.iconSize = 24,
-    this.defaultImage,
+    this.defaultImage, // Now defaultImage is File?
     required this.onImageSelected,
     this.iconColor = Colors.white,
-    this.iconBackgroundColor, this.icon,
+    this.iconBackgroundColor,
+    this.icon,
   });
 
   final double width;
   final double height;
   final double iconSize;
   final IconData? icon;
-  final AssetImage? defaultImage;
+  final File? defaultImage; // ✅ Changed to File?
   final Function(File?) onImageSelected;
   final Color iconColor;
   final Color? iconBackgroundColor;
@@ -43,26 +44,18 @@ class _MYEditableProfileImageState extends State<MYEditableProfileImage> {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // Image container
               Container(
                 width: MySizes.ninty.sw,
                 height: MySizes.fifty.sh,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                ),
+                decoration: const BoxDecoration(color: Colors.white),
                 child: ClipRRect(
                   child: _imageFile != null
-                      ? Image.file(
-                          _imageFile!,
-                          fit: BoxFit.fitWidth,
-                        )
-                      : Image(
-                          image: widget.defaultImage!,
-                          fit: BoxFit.fitWidth,
-                        ),
+                      ? Image.file(_imageFile!, fit: BoxFit.cover)
+                      : widget.defaultImage != null
+                      ? Image.file(widget.defaultImage!, fit: BoxFit.cover)
+                      : Container(),
                 ),
               ),
-              // Close button
               Positioned(
                 top: -20,
                 right: -20,
@@ -82,11 +75,7 @@ class _MYEditableProfileImageState extends State<MYEditableProfileImage> {
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    child: const Icon(Icons.close, color: Colors.white, size: 20),
                   ),
                 ),
               ),
@@ -138,12 +127,11 @@ class _MYEditableProfileImageState extends State<MYEditableProfileImage> {
         imageQuality: 85,
       );
 
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
-        widget.onImageSelected(_imageFile);
-      }
+      setState(() {
+        _imageFile = pickedFile != null ? File(pickedFile.path) : null;
+      });
+
+      widget.onImageSelected(_imageFile);
     } catch (e) {
       debugPrint('Error picking image: $e');
     }
@@ -163,38 +151,22 @@ class _MYEditableProfileImageState extends State<MYEditableProfileImage> {
                 color: Colors.grey[200],
                 shape: BoxShape.circle,
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(widget.width.w / 2),
+              child: ClipOval(
                 child: _imageFile != null
-                    ? Image.file(
-                        _imageFile!,
-                        width: widget.width.w,
-                        height: widget.height.h,
-                        fit: BoxFit.cover,
-                      )
+                    ? Image.file(_imageFile!, width: widget.width.w, height: widget.height.h, fit: BoxFit.cover)
                     : widget.defaultImage != null
-                        ? Image(
-                            image: widget.defaultImage!,
-                            width: widget.width.w,
-                            height: widget.height.h,
-                            fit: BoxFit.cover,
-                          )
-                        : Icon(
-                            Icons.person,
-                            size: widget.width.w * 0.5,
-                            color: Colors.grey[400],
-                          ),
+                    ? Image.file(widget.defaultImage!, width: widget.width.w, height: widget.height.h, fit: BoxFit.cover)
+                    : Icon(Icons.person, size: widget.width.w * 0.5, color: Colors.grey[400]),
               ),
             ),
           ),
           Positioned(
             bottom: 5,
             right: 25,
-            child: Container(
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-              ),
-              child: MyCircularIcon(icon: widget.icon ?? Icons.camera_alt,backgroundColor: MYColors.secondaryColor,onTap:()=>_showImagePicker(context),)
+            child: MyCircularIcon(
+              icon: widget.icon ?? Icons.camera_alt,
+              backgroundColor: MYColors.secondaryColor,
+              onTap: () => _showImagePicker(context),
             ),
           ),
         ],
