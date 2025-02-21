@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:infidea_consultancy_app/core/utils/helpers/bars.dart';
+import 'package:infidea_consultancy_app/data/repositories/auth_repository.dart';
+import 'package:infidea_consultancy_app/data/repositories/dropdown_repository.dart';
 import 'package:infidea_consultancy_app/logic/blocs/form/form_state.dart';
 import 'package:infidea_consultancy_app/presentation/screens/profile/steponecollection.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/buttons/elevated_button.dart';
@@ -23,42 +25,106 @@ class StepTwoCollection extends StatefulWidget {
 
 class StepTwoCollectionState extends State<StepTwoCollection> {
 
-  final List<String> cities = [
-    "Indore",
-    "Mumbai",
-    "Delhi",
-    "Bangalore",
-    "Chennai",
-    "Kolkata",
-    "Hyderabad",
-    "Pune",
-    "Jaipur",
-    "Ahmedabad"
-  ];
+  List<Map<String, dynamic>> _states = [];
+  List<String> _cities = [];
+  List<String> _indoreLocalities = [];
+  List<String> _languages = [];
+  List<String> _metroCities = [];
+  bool isLoading = false;
+  DropdownRepository dropdownRepository = DropdownRepository();
 
-  final List<String> languages = [
-    "Hindi",
-    "German",
-    "Oriya",
-    "French",
-    "Parsi",
-    "Sindhi",
-    "English",
-    "Tamil",
-    "Telugu",
-    "Marathi",
-    "Gujarati",
-    "Bengali",
-    "Punjabi",
-    "Kannada",
-    "Malayalam"
-  ];
+  Future<void> fetchStates() async {
+    try {
+      final states = await dropdownRepository.getStates();
+      setState(() {
+        _states = states;
+      });
+    } catch (e) {
+      print("Error fetching states: $e");
+    }
+  }
+
+  Future<void> fetchCities(String stateCode) async {
+    setState(() => isLoading = true);
+    try {
+      final cities = await dropdownRepository.getCities(stateCode);
+      setState(() {
+        _cities = cities;
+      });
+    } catch (e) {
+      print("Error fetching cities: $e");
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> fetchLanguages() async {
+    try {
+      final languages = await dropdownRepository.getLanguages();
+      setState(() {
+        _languages = languages;
+      });
+    } catch (e) {
+      print("Error fetching languages: $e");
+    }
+  }
+
+  Future<void> fetchIndoreLocalities() async {
+    try {
+      final indoreLocalities = await dropdownRepository.getIndoreLocalities();
+      setState(() {
+        _indoreLocalities = indoreLocalities;
+      });
+    } catch (e) {
+      print("Error fetching languages: $e");
+    }
+  }
+
+  Future<void> fetchMetroCities() async {
+    setState(() => isLoading = true);
+    try {
+      final metroCities = await dropdownRepository.getMetroCities();
+      setState(() {
+        _metroCities = metroCities;
+      });
+    } catch (e) {
+      print("Error fetching metro cities: $e");
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _onStateChanged(String? selectedState) {
+    final selectedStateCode = _states
+        .firstWhere(
+            (state) => state['name'] == selectedState,
+        orElse: () => {"code": null})['code']; // Extract state code
+
+    if (selectedStateCode != null) {
+      fetchCities(selectedStateCode); // Fetch cities for selected state
+    }
+
+    context.read<FormBloc>().add(UpdateFormEvent(state: selectedState));
+  }
+
+  void _onCityChanged(String? city) {
+
+
+    if (city == 'indore' || city == 'Indore') {
+      fetchIndoreLocalities(); // Fetch localities for indore
+    }
+
+    context.read<FormBloc>().add(UpdateFormEvent(currentCity: city));
+  }
+
+
 
   @override
   void initState() {
     super.initState();
-    context.read<FormBloc>().add(LoadFormData());
-
+    fetchStates();
+    fetchLanguages();
+    fetchMetroCities();
   }
 
 
@@ -79,14 +145,13 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
     return SafeArea(
       child: BlocConsumer<FormBloc,UserFormState>(
           listener: (BuildContext context, UserFormState formState) {
-
             formState.copyWith(
               currentCity: formState.currentCity,
               currentLocality: formState.currentLocality,
               preferredCities: formState.preferredCities,
               languages: formState.languages,
+              state: formState.state,
             );
-
           },
         builder: (context,formState){
           final formBloc = context.read<FormBloc>();
@@ -107,6 +172,7 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
             ),
           ),
           body: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),
               child: Center(
@@ -121,20 +187,27 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
                     ),
                     verticalSpace(MySizes.spaceBtwSections.r),
                     SingleDropdownSelect(
-                      question: MYTexts.currentLocation,
-                      selectedItem: formState.currentCity,
-                      items: cities,
-                      onSelectionChanged: (selected) {
-                        formBloc.add(
-                            UpdateFormEvent(currentCity: selected));
-                      },
+                      question: MYTexts.state,
+                      selectedItem: formState.state,
+                      items: _states,
+                      labelKey: 'name',
+                      onSelectionChanged: (selected)=> _onStateChanged(selected),
                     ),
                     verticalSpace(MySizes.spaceBtwSectionsLg.r),
+                    if(formState.state!=null)...[
+                    SingleDropdownSelect(
+                      question: MYTexts.currentCity,
+                      selectedItem: formState.currentCity,
+                      items: _cities,
+                      onSelectionChanged: (selected) => _onCityChanged(selected),
+
+                    ),
+                      verticalSpace(MySizes.spaceBtwSectionsLg.r),],
                     if (formState.currentCity == 'indore' || formState.currentCity == 'Indore') ...[
                       SingleDropdownSelect(
                         question: MYTexts.currentLocality,
                         selectedItem: formState.currentLocality,
-                        items: cities,
+                        items: _indoreLocalities,
                         onSelectionChanged: (selected) {
                           formBloc.add(
                               UpdateFormEvent(currentLocality: selected));
@@ -145,26 +218,25 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
                     MultiDropdownSelect(
                       question: MYTexts.preferredLocations,
                       selectedItems: formState.preferredCities??[],
-                      items: cities,
+                      items: _metroCities,
                       maxSelection: 3,
                       onSelectionChanged: (List<String> newSelection) {
                         formBloc.add(
                             UpdateFormEvent(preferredCities: newSelection));
                       },
-                      isDown: true,
                     ),
                     verticalSpace(MySizes.spaceBtwSectionsLg.r),
                     MultiDropdownSelect(
                       question: MYTexts.speakingLanguages,
                       selectedItems: formState.languages??[],
-                      items: languages,
+                      items: _languages,
                       maxSelection: 5,
                       onSelectionChanged: (List<String> newSelection) {
                         formBloc.add(
                             UpdateFormEvent(languages: newSelection));
                       },
-                      isDown: true,
-                    )
+                    ),
+                    verticalSpace(MySizes.spaceBtwSectionsLg.r),
                   ],
                 ),
               ),
