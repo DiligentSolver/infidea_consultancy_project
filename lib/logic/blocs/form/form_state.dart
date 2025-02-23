@@ -26,7 +26,7 @@ class UserFormState extends Equatable {
   final List<String>? languages;
   final List<String>? selectedRoles;
   final String? educationLevel;
-  final bool? isCurrentlyStudying;
+  final String? isCurrentlyStudying;
   final String? graduateCollege;
   final String? graduateDegree;
   final String? graduateStartYear;
@@ -142,7 +142,7 @@ class UserFormState extends Equatable {
     List<String>? languages,
     List<String>? selectedRoles,
     String? educationLevel,
-    bool? isCurrentlyStudying,
+    String? isCurrentlyStudying,
     String? graduateCollege,
     String? graduateDegree,
     String? graduateStartYear,
@@ -307,7 +307,7 @@ class UserFormState extends Equatable {
               startingYear: graduateStartYear?? '',
               grade: graduateGrade?? '',
               branch: graduateBranch?? '',
-              isCurrentlyStudying: isCurrentlyStudying ?? false,
+              isCurrentlyStudying: isCurrentlyStudying ?? '',
               educationLevel: educationLevel?? '',
               postgraduateDegree: postGraduateDegree?? '',
               postgraduateCollege: postGraduateCollege?? '',

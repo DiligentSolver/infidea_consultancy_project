@@ -65,6 +65,7 @@ class MYColors {
   /// Colors
   static const Color black = Colors.black;
   static const Color white = Colors.white;
+  static const Color bannerWhite = Color(0xFFF5F5F5);
   static const Color grey = Colors.grey;
   static const Color shadow = Color(0x40000000);
   static const Color hyperlinkUnvisited = Color(0xFF0000EE);

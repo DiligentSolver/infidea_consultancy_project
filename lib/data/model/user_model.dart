@@ -252,7 +252,7 @@ class Education {
   final String? startingYear;
   final String? grade;
   final String? branch;
-  final bool? isCurrentlyStudying;
+  final String? isCurrentlyStudying;
   final String? educationLevel;
   final String? postgraduateDegree;
   final String? postgraduateCollege;

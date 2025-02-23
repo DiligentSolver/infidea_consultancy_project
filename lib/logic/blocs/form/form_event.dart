@@ -32,7 +32,7 @@ class UpdateFormEvent extends FormEvent {
   final List<String>? languages;
   final List<String>? selectedRoles;
   final String? educationLevel;
-  final bool? isCurrentlyStudying;
+  final String? isCurrentlyStudying;
   final String? graduateCollege;
   final String? graduateDegree;
   final String? graduateStartYear;

@@ -37,6 +37,7 @@ class DateOfBirthPickerState extends State<DateOfBirthPicker> {
     );
 
     if (picked != null) {
+      print(picked);
       widget.onDateSelected(picked);
     }
   }

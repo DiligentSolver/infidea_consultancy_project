@@ -48,6 +48,9 @@ class StepOneCollectionState extends State<StepOneCollection> {
     super.initState();
     final formState = context.read<FormBloc>().state;
 
+    // Load form data from backend or local storage
+    context.read<FormBloc>().add(LoadFormData());
+
     // Initialize controllers with existing values
     firstNameController = TextEditingController(text: formState.firstName ?? "");
     lastNameController = TextEditingController(text: formState.lastName ?? "");
@@ -55,8 +58,6 @@ class StepOneCollectionState extends State<StepOneCollection> {
     emailController = TextEditingController(text: formState.email ?? "");
     mobileController = TextEditingController(text: formState.mobile ?? "");
 
-    // Load form data from backend or local storage
-    context.read<FormBloc>().add(LoadFormData());
   }
 
   void _validateAndProceed(BuildContext context) {
@@ -87,17 +88,6 @@ class StepOneCollectionState extends State<StepOneCollection> {
       child: BlocConsumer<FormBloc, UserFormState>(
         listener: (context, formState) {
 
-          formState.copyWith(
-            firstName: formState.firstName,
-            lastName: formState.lastName,
-            fatherName: formState.fatherName,
-            mobile: formState.mobile,
-            email: formState.email,
-            dob: formState.dob,
-            gender: formState.gender,
-            experience: formState.experience,
-          );
-
           firstNameController.text = formState.firstName ?? "";
           lastNameController.text = formState.lastName ?? "";
           fatherNameController.text = formState.fatherName ?? "";
@@ -107,25 +97,25 @@ class StepOneCollectionState extends State<StepOneCollection> {
         },
         builder: (context, formState) {
           return Scaffold(
-            appBar: AppBar(
-              title: Row(
-                children: [
-                  Expanded(
-                    child: CustomLinearProgressIndicator(
-                      progress: formState.calculateProgress(),
-                    ),
-                  ),
-                  horizontalSpace(MySizes.spaceBtwItems.r),
-                  const Text("Page: 1/5"),
-                ],
-              ),
-            ),
-            bottomNavigationBar: BottomAppBar(
-              child: MYElevatedButton(
-                onPressed: () => _validateAndProceed(context),
-                child: const Text(MYTexts.next),
-              ),
-            ),
+            // appBar: AppBar(
+            //   title: Row(
+            //     children: [
+            //       Expanded(
+            //         child: CustomLinearProgressIndicator(
+            //           progress: formState.calculateProgress(),
+            //         ),
+            //       ),
+            //       horizontalSpace(MySizes.spaceBtwItems.r),
+            //       const Text("Page: 1/5"),
+            //     ],
+            //   ),
+            // ),
+            // bottomNavigationBar: BottomAppBar(
+            //   child: MYElevatedButton(
+            //     onPressed: () => _validateAndProceed(context),
+            //     child: const Text(MYTexts.next),
+            //   ),
+            // ),
             body: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),

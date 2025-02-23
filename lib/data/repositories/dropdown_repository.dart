@@ -13,7 +13,6 @@ class DropdownRepository {
   Future<List<Map<String,dynamic>>> getStates() async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get('api/states');
       if(response.statusCode==200){
         return (response.data as List)
@@ -33,7 +32,6 @@ class DropdownRepository {
   Future<List<String>> getCities(String stateCode) async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get('api/cities/$stateCode');
       if(response.statusCode==200){
         return List<String>.from(response.data['cities']);
@@ -49,7 +47,6 @@ class DropdownRepository {
   Future<List<String>> getIndoreLocalities() async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get('api/localities/indore');
       if(response.statusCode==200){
         return List<String>.from(response.data);
@@ -65,7 +62,6 @@ class DropdownRepository {
   Future<List<String>> getDegrees() async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get('api/degrees');
       if(response.statusCode==200){
         return List<String>.from(response.data);
@@ -81,7 +77,6 @@ class DropdownRepository {
 Future<List<String>> getMetroCities() async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get('api/corporate:metro:cities');
       if(response.statusCode==200){
         return List<String>.from(response.data);
@@ -97,7 +92,6 @@ Future<List<String>> getMetroCities() async {
   Future<List<String>> getLanguages() async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get('api/languages');
       if(response.statusCode==200){
         return List<String>.from(response.data);
@@ -114,7 +108,6 @@ Future<List<String>> getMetroCities() async {
    Future<List<String>> getIndustries() async {
     try{
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio .get('api/industries');
       if (response.statusCode == 200) {
         return List<String>.from(response.data);

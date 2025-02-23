@@ -179,7 +179,6 @@ class AuthRepository {
   Future<Map<String, dynamic>?> fetchUserDetails(String token) async {
     try {
       // **Add a delay before calling API**
-      await Future.delayed(const Duration(seconds: 2));
       final response = await _dio.get(
         'api/users/user-profile',
         options: Options(headers: {'Authorization': 'Bearer $token'}),

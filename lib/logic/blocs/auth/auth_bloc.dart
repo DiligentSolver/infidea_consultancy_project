@@ -58,7 +58,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       await _emitErrorState(e, emit);
     } finally {
-      await Future.delayed(const Duration(seconds: 2));
       FlutterNativeSplash.remove();
     }
   }

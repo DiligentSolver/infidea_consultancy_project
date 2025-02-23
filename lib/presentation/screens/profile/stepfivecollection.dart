@@ -80,7 +80,12 @@ class StepFiveCollectionState extends State<StepFiveCollection> {
   void initState() {
     super.initState();
     fetchIndustries();
-    context.read<FormBloc>().add(LoadFormData());
+  }
+
+  @override
+  dispose(){
+    super.dispose();
+
   }
 
   void _onCompleteForm(BuildContext context) {
@@ -98,27 +103,23 @@ class StepFiveCollectionState extends State<StepFiveCollection> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: BlocConsumer<FormBloc, UserFormState>(
-        listener: (context, formState) {
-          formState.copyWith(selectedRoles: formState.selectedRoles);
-        },
+      child: BlocBuilder<FormBloc, UserFormState>(
         builder: (BuildContext context, formState) {
           final List<String> selectedRoles = formState.selectedRoles ?? [];
-
           return SafeArea(
             child: Scaffold(
-              appBar: AppBar(
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: CustomLinearProgressIndicator(
-                          progress: formState.calculateProgress()),
-                    ),
-                    horizontalSpace(MySizes.spaceBtwItems.r),
-                    const Text("Page: 5/5"),
-                  ],
-                ),
-              ),
+              // appBar: AppBar(
+              //   title: Row(
+              //     children: [
+              //       Expanded(
+              //         child: CustomLinearProgressIndicator(
+              //             progress: formState.calculateProgress()),
+              //       ),
+              //       horizontalSpace(MySizes.spaceBtwItems.r),
+              //       const Text("Page: 5/5"),
+              //     ],
+              //   ),
+              // ),
               body: SingleChildScrollView(
                 child: Padding(
                   padding:
@@ -192,24 +193,24 @@ class StepFiveCollectionState extends State<StepFiveCollection> {
                 ),
               ),
 
-              // ✅ Complete Button
-              bottomNavigationBar: BottomAppBar(child:
-                  BlocConsumer<AuthBloc, AuthState>(
-                      listener: (context, state){
-                        if (state is Authenticated) {
-                          Navigator.pushNamedAndRemoveUntil(
-                              context, '/homeScreen', (route) => false);
-                        }
-                      },
-                      builder: (context, state) {
-                return MYElevatedButton(
-                  onPressed: selectedRoles.isEmpty
-                      ? null
-                      : () => _onCompleteForm(context),
-                  child: const Text('Complete'),
-                );
-
-              })),
+              // // ✅ Complete Button
+              // bottomNavigationBar: BottomAppBar(child:
+              //     BlocConsumer<AuthBloc, AuthState>(
+              //         listener: (context, state){
+              //           if (state is Authenticated) {
+              //             Navigator.pushNamedAndRemoveUntil(
+              //                 context, '/homeScreen', (route) => false);
+              //           }
+              //         },
+              //         builder: (context, state) {
+              //   return MYElevatedButton(
+              //     onPressed: selectedRoles.isEmpty
+              //         ? null
+              //         : () => _onCompleteForm(context),
+              //     child: const Text('Complete'),
+              //   );
+              //
+              // })),
             ),
           );
         },

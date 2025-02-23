@@ -12,6 +12,7 @@ import 'package:infidea_consultancy_app/presentation/screens/auth/server_problem
 import 'package:infidea_consultancy_app/presentation/screens/auth/terms&conditions.dart';
 import 'package:infidea_consultancy_app/presentation/screens/home/home_screen.dart';
 import 'package:infidea_consultancy_app/presentation/screens/onboarding/onboarding.dart';
+import 'package:infidea_consultancy_app/presentation/screens/profile/form_pages.dart';
 import 'package:infidea_consultancy_app/presentation/screens/profile/stepFourCollection.dart';
 import 'package:infidea_consultancy_app/presentation/screens/profile/stepTwoCollection.dart';
 import 'package:infidea_consultancy_app/presentation/screens/profile/stepfivecollection.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
           ), BlocProvider<FormBloc>(
             create: (context) =>
            FormBloc(authRepository),
+            lazy: false,
           ),
         ],
         child: ScreenUtilInit(
@@ -90,7 +92,7 @@ class MyApp extends StatelessWidget {
                           context,'/serverProblem');
                     } else if (state is NewUserState) {
                       Navigator.pushReplacementNamed(
-                          context,'/stepOneCollection');
+                          context,'/formPages');
                     }
                     else if(state is AuthError){
                       Navigator.pushReplacementNamed(
@@ -114,6 +116,7 @@ class MyApp extends StatelessWidget {
                   '/stepThreeCollection': (context) => const StepThreeCollection(),
                   '/stepFourCollection': (context) => const StepFourCollection(),
                   '/stepFiveCollection': (context) => const StepFiveCollection(),
+                  '/formPages': (context) => const MultiStepFormPageView(),
                   '/errorScreen': (context)=> const ErrorScreen(),
                   '/homeScreen': (context)=> const HomePage(),
                   '/otpVerificationPage': (context) {

@@ -87,10 +87,11 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
 
   Future<void> _onCompleteForm(
       CompleteForm event, Emitter<UserFormState> emit) async {
-    if (state.isComplete()) {
-      final authBloc = BlocProvider.of<AuthBloc>(event.context); // ✅ Get existing AuthBloc
-      authBloc.add(RegisterNewUserFormEvent(state.toJson()));
-    }
+    // if (state.isComplete()) {
+    //   final authBloc = BlocProvider.of<AuthBloc>(event.context); // ✅ Get existing AuthBloc
+    //   authBloc.add(RegisterNewUserFormEvent(state.toJson()));
+    // }
+    print(state.toJson());
   }
 
 }
