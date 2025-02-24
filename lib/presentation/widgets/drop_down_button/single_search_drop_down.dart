@@ -10,13 +10,13 @@ class SingleSearchDropdownButton extends StatelessWidget {
   final List<dynamic> items;
   final  dynamic Function(dynamic)? onChanged;
   final double overlayHeight;
-  final String? question;
+  final String? question,hintText;
 
   const SingleSearchDropdownButton({
     super.key,
     required this.items,
     required this.onChanged,
-    this.overlayHeight = MySizes.fifty, this.question,
+    this.overlayHeight = MySizes.fourty, this.question, this.hintText,
   });
 
   @override
@@ -33,17 +33,15 @@ class SingleSearchDropdownButton extends StatelessWidget {
             ),
           ),
           CustomDropdown.search(
-          noResultFoundBuilder: (context,val){
-            return const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Center(child: SizedBox(height:20,width:20,child: CircularProgressIndicator(strokeWidth: 2,))),
-            );
-          },
+          noResultFoundText: "Select State first or no result found",
           items: items,
           onChanged: onChanged,
           overlayHeight: overlayHeight.sh,
           closeDropDownOnClearFilterSearch: true,
           decoration: CustomDropdownDecoration(
+            listItemDecoration: const ListItemDecoration(
+                selectedColor:MYColors.transparent
+            ),
             expandedFillColor: MYAppHelperFunctions.isDarkMode(context)
                 ? MYColors.black
                 : MYColors.bannerWhite,
@@ -77,6 +75,7 @@ class SingleSearchDropdownButton extends StatelessWidget {
               ),
             ),
           ),
+            hintText: hintText ?? "Select an option",
         ),
       ],
     );

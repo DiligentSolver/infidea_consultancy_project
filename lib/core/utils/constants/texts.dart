@@ -101,7 +101,7 @@ class MYTexts {
   // Location & Language Selection
   static const String formScreen2Title = "Page 2/5";
   static const String fetchError = "Failed to fetch options. Please try again.";
-  static const String preferredLocations = "What are your Preferred Location's ?";
+  static const String preferredLocations = "What are your Preferred Locations ?";
   static const String speakingLanguages = "Which languages you can speak ?";
   static const String loading = "Loading...";
   static const String state = "What is your state?";

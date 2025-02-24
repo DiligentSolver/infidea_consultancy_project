@@ -65,21 +65,21 @@ class StepFourCollectionState extends State<StepFourCollection> {
         builder:(context,formState){
           final formBloc = context.read<FormBloc>();
           return Scaffold(
-          // appBar: AppBar(
-          //     title: Row(
-          //       children: [
-          //         Expanded(child: CustomLinearProgressIndicator(progress: formState.calculateProgress())),
-          //         horizontalSpace(MySizes.spaceBtwItems.r),
-          //         const Text("Page: 4/5"),
-          //       ],
-          //     )
-          // ),
-          // bottomNavigationBar: BottomAppBar(
-          //   child: MYElevatedButton(
-          //     onPressed: () => _validateAndProceed(),
-          //     child: const Text(MYTexts.next),
-          //   ),
-          // ),
+          appBar: AppBar(
+              title: Row(
+                children: [
+                  Expanded(child: CustomLinearProgressIndicator(progress: formState.calculateProgress())),
+                  horizontalSpace(MySizes.spaceBtwItems.r),
+                  const Text("Page: 4/5"),
+                ],
+              )
+          ),
+          bottomNavigationBar: BottomAppBar(
+            child: MYElevatedButton(
+              onPressed: () => _validateAndProceed(),
+              child: const Text(MYTexts.next),
+            ),
+          ),
           body: SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),

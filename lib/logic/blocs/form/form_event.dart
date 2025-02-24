@@ -28,6 +28,7 @@ class UpdateFormEvent extends FormEvent {
   final List<String>? indoreLocalities;
   final String? currentCity;
   final String? currentLocality;
+  final String? industry;
   final List<String>? preferredCities;
   final List<String>? languages;
   final List<String>? selectedRoles;
@@ -63,6 +64,7 @@ class UpdateFormEvent extends FormEvent {
     this.currentLocality,
     this.preferredCities,
     this.languages,
+    this.industry,
     this.selectedRoles,
     this.educationLevel,
     this.isCurrentlyStudying,
@@ -94,7 +96,7 @@ class UpdateFormEvent extends FormEvent {
     firstName, lastName, fatherName, email, mobile, dob,
     gender, experience, state,currentCity, currentLocality,
     preferredCities, languages, selectedRoles, educationLevel,
-    isCurrentlyStudying, graduateCollege, graduateDegree,
+    isCurrentlyStudying, graduateCollege, graduateDegree, industry,
     graduateStartYear, graduateEndYear, graduateUniversity,graduateBranch,graduateGrade,postGraduateCollege,
     postGraduateDegree, postGraduateStartYear, postGraduateEndYear,postGraduateUniversity,postGraduateBranch,postGraduateGrade,resumeFile,imageFile,indoreLocalities,cities,metroCities,states
   ];

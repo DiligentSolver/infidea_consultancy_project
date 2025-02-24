@@ -159,8 +159,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final user = await authRepository.registerNewUserForm(event.formData);
       if (user == null) return emit(AuthError("Problem with registering user"));
 
-      print(user.fatherName);
-
       emit(Authenticated(user));
     } catch (e) {
       await _emitErrorState(e, emit);

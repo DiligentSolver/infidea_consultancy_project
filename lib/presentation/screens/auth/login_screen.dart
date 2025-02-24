@@ -8,7 +8,6 @@ import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
 import 'package:infidea_consultancy_app/core/utils/helpers/bars.dart';
 import 'package:infidea_consultancy_app/core/utils/helpers/helper_functions.dart';
 import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
-import 'package:infidea_consultancy_app/data/repositories/auth_repository.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/input_fields/text_form_field.dart';
 import '../../../core/utils/validators/validator.dart';
 import '../../../logic/blocs/auth/auth_bloc.dart';
@@ -120,7 +119,10 @@ class LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      textInputAction: TextInputAction.send,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (value){
+                        context.read<AuthBloc>().add(SendOtpEvent(_mobileController.text.replaceAll(" ", "").replaceAll("+91", "")));
+                      },
                       hintText: 'Enter your mobile number',
                       labelText: 'Mobile Number',
                       onChanged: (value){

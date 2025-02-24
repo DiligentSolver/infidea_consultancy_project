@@ -10,16 +10,16 @@ class MultiSearchDropdownButton extends StatefulWidget {
   final List<dynamic> items;
   final dynamic Function(dynamic)? onChanged;
   final double overlayHeight;
-  final String? question;
+  final String? question,hintText;
   final int maxSelection; // Max selection limit
 
   const MultiSearchDropdownButton({
     super.key,
     required this.items,
     required this.onChanged,
-    this.overlayHeight = MySizes.fifty,
+    this.overlayHeight = MySizes.fourty,
     this.question,
-    this.maxSelection = 3, // Default max selection
+    this.maxSelection = 3, this.hintText, // Default max selection
   });
 
   @override
@@ -71,8 +71,11 @@ class _MultiSearchDropdownButtonState extends State<MultiSearchDropdownButton> {
           onListChanged: _handleSelection,
           overlayHeight: widget.overlayHeight.sh,
           closeDropDownOnClearFilterSearch: true,
-          hintText: "You can select up to ${widget.maxSelection}",
+          hintText: widget.hintText ?? "You can select up to ${widget.maxSelection}",
           decoration: CustomDropdownDecoration(
+            listItemDecoration: const ListItemDecoration(
+              selectedColor:MYColors.transparent
+            ),
             expandedFillColor: MYAppHelperFunctions.isDarkMode(context)
                 ? MYColors.black
                 : MYColors.bannerWhite,

@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/sizes.dart';
 import 'package:infidea_consultancy_app/core/utils/helpers/bars.dart';
 import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
-import 'package:infidea_consultancy_app/core/utils/validators/validator.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/input_fields/text_form_field.dart';
 import '../../../core/utils/constants/texts.dart';
 import '../../../logic/blocs/form/form_bloc.dart';
@@ -64,7 +63,7 @@ class StepOneCollectionState extends State<StepOneCollection> {
     final formBloc = context.read<FormBloc>();
     final formState = formBloc.state;
 
-    if (_formKey.currentState!.validate() && formState.isStepOneValid()) {
+    if ( firstNameController.text.isNotEmpty && lastNameController.text.isNotEmpty&& fatherNameController.text.isNotEmpty&& emailController.text.isNotEmpty && mobileController.text.isNotEmpty && formState.isStepOneValid()) {
       formBloc.add(SubmitForm());
       Navigator.pushNamed(context, '/stepTwoCollection');
     } else {
@@ -97,25 +96,25 @@ class StepOneCollectionState extends State<StepOneCollection> {
         },
         builder: (context, formState) {
           return Scaffold(
-            // appBar: AppBar(
-            //   title: Row(
-            //     children: [
-            //       Expanded(
-            //         child: CustomLinearProgressIndicator(
-            //           progress: formState.calculateProgress(),
-            //         ),
-            //       ),
-            //       horizontalSpace(MySizes.spaceBtwItems.r),
-            //       const Text("Page: 1/5"),
-            //     ],
-            //   ),
-            // ),
-            // bottomNavigationBar: BottomAppBar(
-            //   child: MYElevatedButton(
-            //     onPressed: () => _validateAndProceed(context),
-            //     child: const Text(MYTexts.next),
-            //   ),
-            // ),
+            appBar: AppBar(
+              title: Row(
+                children: [
+                  Expanded(
+                    child: CustomLinearProgressIndicator(
+                      progress: formState.calculateProgress(),
+                    ),
+                  ),
+                  horizontalSpace(MySizes.spaceBtwItems.r),
+                  const Text("Page: 1/5"),
+                ],
+              ),
+            ),
+            bottomNavigationBar: BottomAppBar(
+              child: MYElevatedButton(
+                onPressed: () => _validateAndProceed(context),
+                child: const Text(MYTexts.next),
+              ),
+            ),
             body: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: MySizes.defaultSpace.r),

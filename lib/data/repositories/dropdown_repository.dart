@@ -126,13 +126,14 @@ Future<List<String>> getMetroCities() async {
     try{
       final response = await _dio.get('api/jobs/$industry');
       if (response.statusCode == 200) {
-        final data = json.decode(response.data);
-        return List<String>.from(data['jobRoles']);
+        final data = response.data;
+        return List<String>.from(data);
       }
     } on DioException catch(e){
       _handleDioException(e, 'Failed to get Job roles');
     }
     catch(e){
+      print(e);
       throw Exception('An unexpected error occurred while getting roles');
     }
       return [];

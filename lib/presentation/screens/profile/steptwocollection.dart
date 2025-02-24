@@ -1,5 +1,6 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:infidea_consultancy_app/core/utils/constants/colors.dart';
@@ -41,6 +42,10 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
       setState(() {
         _states = states;
       });
+
+      final FormBloc formBloc = context.read<FormBloc>();
+      final UserFormState formState = formBloc.state;
+        _onStateChanged(formState.state);
     } catch (e) {
       print("Error fetching states: $e");
     }
@@ -97,6 +102,7 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
   }
 
   void _onStateChanged(String? selectedState) {
+    final FormBloc formBloc = context.read<FormBloc>();
     final selectedStateCode = _states.firstWhere(
         (state) => state['name'] == selectedState,
         orElse: () => {"code": null})['code']; // Extract state code
@@ -104,7 +110,7 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
     if (selectedStateCode != null) {
       fetchCities(selectedStateCode); // Fetch cities for selected state
     }
-    context.read<FormBloc>().add(UpdateFormEvent(state: selectedState));
+    formBloc.add(UpdateFormEvent(state: selectedState));
   }
 
   void _onCityChanged(String? city) {
@@ -124,15 +130,37 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
   }
 
   void _validateAndProceed(BuildContext context) {
+    Future.delayed(const Duration(seconds: 1));
     final formBloc = context.read<FormBloc>();
     final formState = formBloc.state;
+
+    if (formState.state == null) {
+      Bars.showCustomToast(context: context, message: "Please select a state.");
+      return;
+    }
+
+    if (formState.currentCity == null) {
+      Bars.showCustomToast(context: context, message: "Please select a city.");
+      return;
+    }
+
+    // Ensure selected city is actually part of the selected state
+    if (!_cities.contains(formState.currentCity)) {
+      Bars.showCustomToast(
+          context: context,
+          message: "City does not belong to the state."
+      );
+      return;
+    }
+
     if (formState.isStepTwoValid()) {
       formBloc.add(SubmitForm());
-      Navigator.pushNamed(
-          context, '/stepThreeCollection'); // Navigate to next form screen
+      Navigator.pushNamed(context, '/stepThreeCollection');
     } else {
       Bars.showCustomToast(
-          context: context, message: MYTexts.fillAllFieldsError);
+          context: context,
+          message: MYTexts.fillAllFieldsError
+      );
     }
   }
 
@@ -143,22 +171,22 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
         builder: (context, formState) {
           final formBloc = context.read<FormBloc>();
           return Scaffold(
-            // appBar: AppBar(
-            //     title: Row(
-            //   children: [
-            //     Expanded(
-            //         child: CustomLinearProgressIndicator(
-            //             progress: formState.calculateProgress())),
-            //     horizontalSpace(MySizes.spaceBtwItems.r),
-            //     const Text("Page: 2/5"),
-            //   ],
-            // )),
-            // bottomNavigationBar: BottomAppBar(
-            //   child: MYElevatedButton(
-            //     onPressed: () => _validateAndProceed(context),
-            //     child: const Text(MYTexts.next),
-            //   ),
-            // ),
+            appBar: AppBar(
+                title: Row(
+              children: [
+                Expanded(
+                    child: CustomLinearProgressIndicator(
+                        progress: formState.calculateProgress())),
+                horizontalSpace(MySizes.spaceBtwItems.r),
+                const Text("Page: 2/5"),
+              ],
+            )),
+            bottomNavigationBar: BottomAppBar(
+              child: MYElevatedButton(
+                onPressed: () => _validateAndProceed(context),
+                child: const Text(MYTexts.next),
+              ),
+            ),
             body: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Padding(
@@ -180,11 +208,13 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
                             _onStateChanged(selected);
                             },
                       question: MYTexts.state,
+                        hintText: formState.state,
                       ),
                       verticalSpace(MySizes.spaceBtwSections.r),
                       if (formState.state != null) ...[
                         SingleSearchDropdownButton(question: MYTexts.currentCity,items: _cities,
-                          onChanged: (selected) => _onCityChanged(selected)
+                          onChanged: (selected) => _onCityChanged(selected),
+                          hintText: formState.currentCity,
                         ),
                         verticalSpace(MySizes.spaceBtwSections.r),
                       ],
@@ -195,6 +225,7 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
                             formBloc.add(
                                 UpdateFormEvent(currentLocality: selected));
                           },
+                          hintText: formState.currentLocality,
                           question: MYTexts.currentLocality,
                         ),
                         verticalSpace(MySizes.spaceBtwSections.r),
@@ -202,12 +233,16 @@ class StepTwoCollectionState extends State<StepTwoCollection> {
                       MultiSearchDropdownButton(maxSelection: 3,question: MYTexts.preferredLocations,items: _metroCities, onChanged: (newSelection) {
                         formBloc.add(
                             UpdateFormEvent(preferredCities: List<String>.from(newSelection)));
-                      }),
+                      },
+                      hintText: formState.preferredCities != null ? formState.preferredCities.toString().replaceAll("[", "").replaceAll("]", ""):null,
+                      ),
                       verticalSpace(MySizes.spaceBtwSections.r),
                       MultiSearchDropdownButton(maxSelection: 5,question: MYTexts.speakingLanguages,items: _languages, onChanged: (newSelection) {
                         formBloc.add(
                             UpdateFormEvent(languages: List<String>.from(newSelection)));
-                      }),
+                      },
+                      hintText: formState.languages!=null?formState.languages.toString().replaceAll("[", "").replaceAll("]", ""):null,
+                      ),
                       verticalSpace(MySizes.spaceBtwSectionsLg.r),
                     ],
                   ),

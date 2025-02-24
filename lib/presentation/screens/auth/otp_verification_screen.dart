@@ -11,6 +11,7 @@ import 'package:infidea_consultancy_app/core/utils/helpers/bars.dart';
 import 'package:infidea_consultancy_app/core/utils/text_styles/text_styles.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/buttons/elevated_button.dart';
 import 'package:infidea_consultancy_app/presentation/widgets/pin_code_text_field/pin_code_text.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import '../../../logic/blocs/auth/auth_bloc.dart';
 import '../../../logic/blocs/auth/auth_event.dart';
 import '../../../logic/blocs/auth/auth_state.dart';
@@ -24,7 +25,7 @@ class OTPVerificationScreen extends StatefulWidget {
   OTPVerificationScreenState createState() => OTPVerificationScreenState();
 }
 
-class OTPVerificationScreenState extends State<OTPVerificationScreen> {
+class OTPVerificationScreenState extends State<OTPVerificationScreen> with CodeAutoFill{
   // final TextEditingController _controllers = TextEditingController();
   int _resendTimer = 30;
   bool _canResend = true;
@@ -32,8 +33,34 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> {
   String _otp = '';
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    listenForOtp();
+  }
+
+  void listenForOtp() async {
+    await SmsAutoFill().listenForCode();
+  }
+
+  @override
+  void codeUpdated() {
+    if (code != null) {
+      setState(() {
+        _otp = code!;
+      });
+
+      // Automatically submit OTP when it's fully received
+      if (_otp.length == 4) {
+        context.read<AuthBloc>().add(VerifyOtpEvent(widget.phoneNumber, _otp));
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
+    cancel(); // Stop listening for OTP when screen is closed
     super.dispose();
   }
 
@@ -77,7 +104,14 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> {
                       MYOtpField(
                         width: 300,
                         onChanged: (value) {
-                          _otp = value;
+                          setState(() {
+                            _otp = value;
+                          });
+
+                          // Auto-submit when OTP is fully entered
+                          if (_otp.length == 4) {
+                            context.read<AuthBloc>().add(VerifyOtpEvent(widget.phoneNumber, _otp));
+                          }
                         },
                       ),
                       verticalSpace(MySizes.spaceBtwItemsSm.r),
@@ -157,4 +191,5 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> {
               ),
             )));
   }
+
 }

@@ -22,6 +22,7 @@ class UserFormState extends Equatable {
   final String? state;
   final String? currentCity;
   final String? currentLocality;
+  final String? industry;
   final List<String>? preferredCities;
   final List<String>? languages;
   final List<String>? selectedRoles;
@@ -58,6 +59,7 @@ class UserFormState extends Equatable {
     this.currentLocality,
     this.preferredCities,
     this.languages,
+    this.industry,
     this.selectedRoles,
     this.educationLevel,
     this.isCurrentlyStudying,
@@ -119,6 +121,7 @@ class UserFormState extends Equatable {
       cities: null,
       metroCities: null,
       states: null,
+      industry: null
     );
   }
 
@@ -138,6 +141,7 @@ class UserFormState extends Equatable {
     String? state,
     String? currentCity,
     String? currentLocality,
+    String? industry,
     List<String>? preferredCities,
     List<String>? languages,
     List<String>? selectedRoles,
@@ -174,6 +178,7 @@ class UserFormState extends Equatable {
       currentLocality: currentLocality ?? this.currentLocality,
       preferredCities: preferredCities ?? this.preferredCities,
       languages: languages ?? this.languages,
+      industry: industry ?? this.industry,
       selectedRoles: selectedRoles ?? this.selectedRoles,
       educationLevel: educationLevel ?? this.educationLevel,
       isCurrentlyStudying: isCurrentlyStudying ?? this.isCurrentlyStudying,
@@ -212,7 +217,7 @@ class UserFormState extends Equatable {
   }
 
   bool isStepTwoValid() {
-    return (state!=null&&currentCity == 'indore' || currentCity == 'Indore' ? currentLocality != null : true) &&
+    return (state!=null && currentCity!=null &&currentCity == 'indore' || currentCity == 'Indore' ? currentLocality != null : true) &&
         preferredCities != null && preferredCities!.isNotEmpty && languages != null && languages!.isNotEmpty;
   }
 
@@ -317,13 +322,14 @@ class UserFormState extends Equatable {
               postgraduateGrade: postGraduateGrade?? '',
               postgraduateBranch: postGraduateBranch?? '')
           .toJson(),
-      'state':state
+      'state':state,
+      'industry':industry
     };
   }
 
   double calculateProgress() {
     int filledFields = 0;
-    int totalFields = 17; // Step One + Step Two + Step Three + Step Four + Step Five
+    int totalFields = 18; // Step One + Step Two + Step Three + Step Four + Step Five
 
     // Step One Fields
     if (firstName?.isNotEmpty ?? false) filledFields++;
@@ -351,6 +357,7 @@ class UserFormState extends Equatable {
     if (resumeFile != null) filledFields++;
 
     // Step Five Fields (Example additional fields)
+    if (industry!=null) filledFields++;
     if (selectedRoles != null && selectedRoles!.isNotEmpty) filledFields++;
 
     // Calculate the progress as the ratio of filled fields to total fields
@@ -385,6 +392,6 @@ class UserFormState extends Equatable {
         postGraduateEndYear,
     resumeFile,
     imageFile,
-    indoreLocalities,cities,states,metroCities
+    indoreLocalities,cities,states,metroCities,industry
       ];
 }

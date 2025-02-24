@@ -247,7 +247,7 @@ class AuthRepository {
         throw Exception("Invalid response from server");
       }
 
-      return response.data;
+      return response.data["user"];
 
     } on DioException catch (e) {
       final result = e.response?.data;
@@ -272,11 +272,11 @@ class AuthRepository {
           e.response!.data.containsKey('code') &&
           e.response!.data['code'] == 1001 &&
           e.response!.data.containsKey('user') &&
-          e.response!.data['user'] != null){
+          e.response!.data['user'] != null) {
         throw e.response!.data;
       }
        debugPrint(e.toString());
-      throw Exception(e.response?.data ?? defaultMessage);
+      throw Exception(e.response?.data['error'] ?? defaultMessage);
     } else if (e.error is SocketException) {
       throw Exception('No Internet Connection');
     } else {
