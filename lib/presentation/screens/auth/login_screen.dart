@@ -137,6 +137,7 @@ class LoginScreenState extends State<LoginScreen> {
                         }
                       },
                     ),
+                    verticalSpace(MySizes.spaceBtwItems.r),
                     // Terms and Conditions with Checkbox
                     Row(
                       children: [

@@ -303,7 +303,7 @@ class UserFormState extends Equatable {
       'currentLocality': currentCity=='indore'||currentCity=='Indore'? currentLocality:''?? '',
       'preferredCities': preferredCities?.map((city) => {"city": city}).toList()??'',
       'languagesKnown': languages?? '',
-      'selectedRoles': selectedRoles?? '',
+      'preferredRoles': selectedRoles?? '',
       'education': Education(
               degree: graduateDegree?? '',
               college: graduateCollege ?? '',

@@ -225,7 +225,7 @@ class StepFiveCollectionState extends State<StepFiveCollection> {
                         context, '/homeScreen', (route) => false);
                   }
                   if(state is AuthError){
-                    Bars.showErrorSnackBar(context: context, title: state.message.replaceAll("Exception:", ""));
+                    Bars.showErrorSnackBar(context: context, title: state.message);
                   }
                 },
                 builder: (context, state) {

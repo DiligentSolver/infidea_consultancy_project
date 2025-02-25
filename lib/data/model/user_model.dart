@@ -29,14 +29,15 @@ class UserModel {
   final String? jobType;
   final String? industry;
   final List<String>? preferredRoles;
-  final String? workMode;
+  final List<String>? workMode;
+  final List<String>? workShift;
   final String? noticePeriod;
   final bool? willingToRelocate;
   final Location? location;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  UserModel({
+  UserModel( {
     this.token,
     this.id,
     this.mobile,
@@ -73,63 +74,57 @@ class UserModel {
     this.location,
     this.createdAt,
     this.updatedAt,
+    this.workShift,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(Map<String, dynamic> userData) {
     try {
-      final userData = json['user'] as Map<String, dynamic>?;
       return UserModel(
-        token: json['token'],
-        id: userData?['_id'],
-        mobile: userData?['mobile'],
-        email: userData?['email'],
-        firstName: userData?['firstName'],
-        lastName: userData?['lastName'],
-        fatherName: userData?['fatherName'],
-        dob: userData?['dob'],
-        gender: userData?['gender'],
-        experience: userData?['experience'],
-        experienceDetails: (userData?['experienceDetails'] as List?)
+        id: userData['_id'],
+        mobile: userData['mobile'],
+        email: userData['email'],
+        firstName: userData['firstName'],
+        lastName: userData['lastName'],
+        fatherName: userData['fatherName'],
+        dob: userData['dob'],
+        gender: userData['gender'],
+        experience: userData['experience'],
+        experienceDetails: (userData['experienceDetails'] as List?)
             ?.map((x) => ExperienceDetail.fromJson(x))
             .toList(),
-        state: userData?['state'],
-        currentCity: userData?['currentCity'],
-        currentLocality: userData?['currentLocality'],
-        preferredCities: (userData?['preferredCities'] as List?)
+        state: userData['state'],
+        currentCity: userData['currentCity'],
+        currentLocality: userData['currentLocality'],
+        preferredCities: (userData['preferredCities'] as List?)
             ?.map((x) => PreferredCity.fromJson(x))
             .toList(),
-        skills: (userData?['skills'] as List?)?.cast<String>(),
-        languagesKnown: (userData?['languagesKnown'] as List?)?.cast<String>(),
-        currentAddress: userData?['currentAddress'],
-        education: (userData?['education'] as List?)
+        skills: (userData['skills'] as List?)?.cast<String>(),
+        languagesKnown: (userData['languagesKnown'] as List?)?.cast<String>(),
+        currentAddress: userData['currentAddress'],
+        education: (userData['education'] as List?)
             ?.map((x) => Education.fromJson(x))
             .toList(),
-        certifications: (userData?['certifications'] as List?)
+        certifications: (userData['certifications'] as List?)
             ?.map((x) => Certification.fromJson(x))
             .toList(),
-        resume: userData?['resume'],
-        passportPhoto: userData?['passportPhoto'],
-        portfolio: userData?['portfolio'],
-        linkedInId: userData?['linkedInId'],
-        about: userData?['about'],
-        projects: (userData?['projects'] as List?)
+        resume: userData['resume'],
+        passportPhoto: userData['passportPhoto'],
+        portfolio: userData['portfolio'],
+        linkedInId: userData['linkedInId'],
+        about: userData['about'],
+        projects: (userData['projects'] as List?)
             ?.map((x) => Project.fromJson(x))
             .toList(),
-        expectedSalary: userData?['expectedSalary'],
-        jobType: userData?['jobType'],
-        industry: userData?['industry'],
-        preferredRoles: (userData?['preferredRoles'] as List?)?.cast<String>(),
-        workMode: userData?['workMode'],
-        noticePeriod: userData?['noticePeriod'],
-        willingToRelocate: userData?['willingToRelocate'],
-        location: userData?['location'] != null
-            ? Location.fromJson(userData?['location'])
-            : null,
-        createdAt: userData?['createdAt'] != null
-            ? DateTime.tryParse(userData?['createdAt'])
-            : null,
-        updatedAt: userData?['updatedAt'] != null
-            ? DateTime.tryParse(userData?['updatedAt'])
+        expectedSalary: userData['expectedSalary'],
+        jobType: userData['jobType'],
+        industry: userData['industry'],
+        preferredRoles: (userData['preferredRoles'] as List?)?.cast<String>(),
+        workMode: (userData['workMode'] as List?)?.cast<String>(),
+        workShift: (userData['workShift'] as List?)?.cast<String>(),
+        noticePeriod: userData['noticePeriod'],
+        willingToRelocate: userData['willingToRelocate'],
+        location: userData['location'] != null
+            ? Location.fromJson(userData['location'])
             : null,
       );
     } catch (e) {
@@ -167,7 +162,8 @@ class UserModel {
       'jobType': jobType??'',
       'industry': industry??'',
       'preferredRoles': preferredRoles??'',
-      'workMode': workMode??'',
+      'workMode': workMode??[],
+      'workShift': workShift??[],
       'noticePeriod': noticePeriod??'',
       'willingToRelocate': willingToRelocate??'',
       'location': location?.toJson()??'',

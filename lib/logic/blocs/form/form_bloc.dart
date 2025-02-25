@@ -1,10 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infidea_consultancy_app/data/model/user_model.dart';
-import 'package:infidea_consultancy_app/data/repositories/dropdown_repository.dart';
 import 'package:infidea_consultancy_app/logic/blocs/auth/auth_bloc.dart';
 import '../auth/auth_event.dart';
 import 'form_event.dart';
@@ -23,15 +19,23 @@ class FormBloc extends Bloc<FormEvent, UserFormState> {
 
   Future<void> _onLoadFormData(
       LoadFormData event, Emitter<UserFormState> emit) async {
-    final Object? responseData = await authRepository.getSavedUserData();
+    final responseData = await authRepository.getSavedUserData();
 
-    final UserModel userData =
-    UserModel.fromJson(responseData as Map<String,dynamic>);
+    if (responseData.containsKey('user')) {
 
-    emit(state.copyWith(
-      mobile: userData.mobile,
-    ));
+      print(responseData);
+
+      final userData = UserModel.fromJson(responseData['user']);
+
+      emit(state.copyWith(
+        mobile: userData.mobile,
+      ));
+    } else {
+      // Handle the case where 'user' key is missing
+      emit(state.copyWith(mobile: ''));
+    }
   }
+
 
 
 

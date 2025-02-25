@@ -32,12 +32,6 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> with CodeA
   Timer? _timer;
   String _otp = '';
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    listenForOtp();
-  }
 
   void listenForOtp() async {
     await SmsAutoFill().listenForCode();
@@ -78,6 +72,13 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> with CodeA
         });
       }
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    listenForOtp();
   }
 
   @override
@@ -153,9 +154,6 @@ class OTPVerificationScreenState extends State<OTPVerificationScreen> with CodeA
                                     color: _canResend
                                         ? MYColors.hyperlinkUnvisited
                                         : MYColors.hyperlinkVisited,
-                                    decoration: _canResend
-                                        ? TextDecoration.underline
-                                        : null,
                                   ),
                                 ),
                               ),

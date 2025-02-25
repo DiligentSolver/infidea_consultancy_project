@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import '../../../core/utils/exception_handling/exceptions.dart';
 import '../../../data/model/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import 'auth_event.dart';
@@ -46,12 +50,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final token = await authRepository.getToken();
         final userData = await authRepository.fetchUserDetails(token!);
 
-        if (userData != null) {
-          final user = UserModel.fromJson(userData);
+        if (userData.containsKey('user')) {
+          final user = UserModel.fromJson(userData['user']);
           emit(Authenticated(user));
         } else {
+          // Handle the case where 'user' key is missing
           emit(Unauthenticated());
         }
+
       } else {
         emit(Unauthenticated());
       }
@@ -104,7 +110,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       final user = await authRepository.verifyOtp(event.mobile, event.otp);
-      if (user == null) return emit(AuthError("Invalid OTP"));
+      if (user == null) return emit(AuthError(UnknownException().toString()));
       emit(Authenticated(user));
     } catch (e) {
       await _emitErrorState(e, emit);
@@ -203,26 +209,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return connectivityResult != ConnectivityResult.none;
   }
 
-
   Future<void> _emitErrorState(dynamic error, Emitter<AuthState> emit) async {
-    if (error.toString().contains("No Internet Connection")) {
+    if (error is NoInternetException) {
       emit(NoInternetState());
-    } else if (error.toString().contains("Server Problem")) {
-      emit(ServerProblemState());
+    } else if (error is BadRequestException ||
+        error is UnauthorizedException ||
+        error is NotFoundException ||
+        error is ServerException) {
+      emit(AuthError(error.toString()));
     } else if (error is Map<String, dynamic> &&
-        error.containsKey('message') &&
         error.containsKey('code') &&
         error.containsKey('user')) {
       try {
-        if(error.containsKey('token')){
+        if (error.containsKey('token')) {
           await authRepository.saveToken(error['token']);
         }
         emit(NewUserState());
       } catch (e) {
-        emit(AuthError("Failed to parse user data: $e"));
+        emit(AuthError("Failed to setup user."));
       }
     } else {
-      emit(AuthError(error.toString()));
+      emit(AuthError("An unexpected error occurred."));
     }
   }
+
+
 }

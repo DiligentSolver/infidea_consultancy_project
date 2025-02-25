@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../config/dio_client.dart';
+import '../../core/utils/exception_handling/exceptions.dart';
 import '../model/user_model.dart';
 
 class AuthRepository {
@@ -65,10 +66,12 @@ class AuthRepository {
         throw Exception("Invalid response from server");
       }
 
-      UserModel user = UserModel.fromJson(response.data);
-      await saveToken(user.token??'');
-      print(getToken());
-      return user;
+      if (response.data.containsKey('user')) {
+        final userData = UserModel.fromJson(response.data['user']);
+        await saveToken(userData.token??'');
+        return userData;
+      }
+
     } on DioException catch (e) {
       _handleDioException(e, 'Failed to verify OTP');
     } catch (e) {
@@ -130,7 +133,8 @@ class AuthRepository {
       final response = await _dio.post(
         'api/auth/user-register',
         data: userModel,
-        options: Options(headers: {"Content-Type": "application/json"}), // Important!
+        options: Options(
+            headers: {"Content-Type": "application/json"}), // Important!
       );
 
       if (response.data == null || response.data is! Map<String, dynamic>) {
@@ -149,14 +153,13 @@ class AuthRepository {
     return null;
   }
 
-  Future<UserModel?> registerNewUserForm(Map<String,dynamic> formData) async {
+  Future<UserModel?> registerNewUserForm(Map<String, dynamic> formData) async {
     try {
       // Delay for API call simulation
       await Future.delayed(const Duration(seconds: 2));
 
-      final response = await _dio.post(
-        'api/auth/user-register',
-        data: jsonEncode(formData));
+      final response =
+          await _dio.post('api/auth/user-register', data: jsonEncode(formData));
 
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception("Invalid response from server");
@@ -174,9 +177,7 @@ class AuthRepository {
     return null;
   }
 
-
-
-  Future<Map<String, dynamic>?> fetchUserDetails(String token) async {
+  Future<Map<String, dynamic>> fetchUserDetails(String token) async {
     try {
       // **Add a delay before calling API**
       final response = await _dio.get(
@@ -190,7 +191,7 @@ class AuthRepository {
       throw Exception(
           'An unexpected error occurred while fetching user details');
     }
-    return null;
+    return {};
   }
 
   Future<bool> isServerAvailable() async {
@@ -220,7 +221,6 @@ class AuthRepository {
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception("Invalid response from server");
       }
-
     } on DioException catch (e) {
       _handleDioException(e, 'Failed to send form data');
     } catch (e) {
@@ -230,7 +230,7 @@ class AuthRepository {
   }
 
   // **Get Form Data from API (for pre-filling or restoring form)**
-  Future<Object?> getSavedUserData() async {
+  Future<Map<String,dynamic>> getSavedUserData() async {
     try {
       final token = await getToken();
       final response = await _dio.get(
@@ -242,45 +242,60 @@ class AuthRepository {
         ),
       );
 
-
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception("Invalid response from server");
       }
 
-      return response.data["user"];
+      return response.data;
 
     } on DioException catch (e) {
       final result = e.response?.data;
       if (result is Map<String, dynamic> &&
-          result.containsKey('code') &&
-          result['code'] == 1001) {
+      result['code'] == 1001 && result['user']!=null) {
         // **Return the user data for new users**
         return result;
       }
     } catch (e) {
       throw Exception('An unexpected error occurred while getting form data');
     }
-    return null;
+    final Map<String,dynamic> value = {};
+    return value;
   }
 
   void _handleDioException(DioException e, String defaultMessage) {
     if (e.response != null) {
-      if (e.response?.statusCode == 502) {
-        throw Exception('Server Problem');
-      }
+      debugPrint(e.toString());
+
       if (e.response?.data != null &&
-          e.response!.data.containsKey('code') &&
           e.response!.data['code'] == 1001 &&
-          e.response!.data.containsKey('user') &&
           e.response!.data['user'] != null) {
-        throw e.response!.data;
+        throw e.response!.data; // Throw full response for new users
       }
-       debugPrint(e.toString());
-      throw Exception(e.response?.data['error'] ?? defaultMessage);
+
+      final errorMessage = e.response?.data?['message'] ??
+          e.response?.data['error'] ??
+          defaultMessage; // Extract error message from API response
+
+      switch (e.response?.statusCode) {
+        case 400:
+          throw BadRequestException(errorMessage);
+        case 401:
+          throw UnauthorizedException();
+        case 404:
+          throw NotFoundException();
+        case 500:
+          throw ServerException();
+        case 501:
+          throw BadRequestException(errorMessage);
+        case 502:
+          throw ServerException();
+        default:
+          throw UnknownException();
+      }
     } else if (e.error is SocketException) {
-      throw Exception('No Internet Connection');
+      throw NoInternetException();
     } else {
-      throw Exception(e);
+      throw UnknownException();
     }
   }
 }

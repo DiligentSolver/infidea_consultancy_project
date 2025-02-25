@@ -133,7 +133,6 @@ Future<List<String>> getMetroCities() async {
       _handleDioException(e, 'Failed to get Job roles');
     }
     catch(e){
-      print(e);
       throw Exception('An unexpected error occurred while getting roles');
     }
       return [];

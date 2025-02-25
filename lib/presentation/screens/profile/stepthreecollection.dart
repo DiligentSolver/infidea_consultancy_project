@@ -122,7 +122,7 @@ class StepThreeCollectionState extends State<StepThreeCollection> {
         // ✅ College Name Dropdown
         MYInputField(
             controller: collegeController,
-            prefixIcon: Icon(FontAwesomeIcons.university),
+            prefixIcon: const Icon(FontAwesomeIcons.university),
             labelText: "College Name",
             onChanged: onCollegeChanged),
         verticalSpace(MySizes.spaceBtwSections.r),
