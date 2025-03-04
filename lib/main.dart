@@ -1,125 +1,172 @@
+import 'package:connection_notifier/connection_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:infidea_consultancy_app/repository/onboarding_repository.dart';
+import 'package:infidea_consultancy_app/screens/application_screen.dart';
+import 'package:infidea_consultancy_app/screens/application_status.dart';
+import 'package:infidea_consultancy_app/screens/drawer/notifications_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/education_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/job_preferences_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/personal_details_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/profile_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/resume_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/skills_screen.dart';
+import 'package:infidea_consultancy_app/screens/edit_screens/work_experience_screen.dart';
+import 'package:infidea_consultancy_app/screens/forms/form_screen_1.dart';
+import 'package:infidea_consultancy_app/screens/forms/form_screen_2.dart';
+import 'package:infidea_consultancy_app/screens/forms/form_screen_3.dart';
+import 'package:infidea_consultancy_app/screens/forms/form_screen_4.dart';
+import 'package:infidea_consultancy_app/screens/forms/form_screen_5.dart';
+import 'package:infidea_consultancy_app/screens/home_screen.dart';
+import 'package:infidea_consultancy_app/screens/interview_screen.dart';
+import 'package:infidea_consultancy_app/screens/job_screen.dart';
+import 'package:infidea_consultancy_app/screens/no_internet_notifier_screen.dart';
+import 'package:infidea_consultancy_app/screens/no_internet_problem.dart';
+import 'package:infidea_consultancy_app/screens/onboarding_screen.dart';
+import 'package:infidea_consultancy_app/screens/otp_verification_screen.dart';
+import 'package:infidea_consultancy_app/screens/profile_details_screen.dart';
+import 'package:infidea_consultancy_app/screens/profile_screen.dart';
+import 'package:infidea_consultancy_app/screens/search_screen.dart';
+import 'package:infidea_consultancy_app/screens/server_problem_screen.dart';
+import 'package:infidea_consultancy_app/screens/terms&conditions.dart';
+import 'bloc/auth/auth_bloc.dart';
+import 'bloc/auth/auth_event.dart';
+import 'bloc/auth/auth_state.dart';
+import 'core/theme/app_theme.dart';
+import 'repository/auth_repository.dart';
+import 'screens/login_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+
+Future<void> main() async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized(); // Ensure widget binding is initialized
+
+  // Preserve splash screen while loading data
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // Initialize repositories
+  final AuthRepository authRepository = AuthRepository();
+  //final VideosRepository videosRepository = VideosRepository();
+  final OnboardingRepository onboardingRepository = OnboardingRepository();
+
+  // Load token and first-time status
+  String? token = await authRepository.getToken();
+  bool isFirstTime = await onboardingRepository.checkFirstTime(); // Ensure it's not null
+
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp(
+    authRepository: authRepository,
+    //videosRepository: videosRepository,
+    token: token,
+    isFirstTime: isFirstTime,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthRepository authRepository;
+  final String? token;
+  final bool isFirstTime;
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  const MyApp({
+    super.key,
+    required this.authRepository,
+    this.token,
+    required this.isFirstTime,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return ConnectionNotifier(
+      connectionNotificationOptions: const ConnectionNotificationOptions(
+          disconnectedConnectionNotification: NoInternetNotifierScreen(),
+          animationDuration: Duration(seconds: 1),
+          height: 50,
+          connectedBackgroundColor: Colors.green
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthBloc>(
+            create: (context) => AuthBloc(authRepository)..add(CheckAuthEvent()),
+          ),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          debugShowCheckedModeBanner: false,
+          home: BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              debugPrint("Auth State Changed: $state");
+
+              Future.delayed(const Duration(milliseconds: 200), () {
+                if (state is Authenticated) {
+                  debugPrint("Navigating to /homeView...");
+                  Navigator.pushReplacementNamed(context, '/homeScreen');
+                } else if (state is Unauthenticated) {
+                  debugPrint("Navigating to Login...");
+                  Navigator.pushReplacementNamed(
+                      context, isFirstTime ? '/onBoarding' : '/homeScreen');
+                } else if (state is ServerProblemState) {
+                  debugPrint("Navigating to Server Problem Page...");
+                  Navigator.pushReplacementNamed(context, '/serverProblem');
+                } else if (state is NoInternetState) {
+                  debugPrint("Navigating to No Internet Page...");
+                  Navigator.pushReplacementNamed(context, '/noInternet');
+                }
+              });
+            },
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                return _getScreenForState(state);
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          routes: {
+            '/onBoarding':(context) => const OnboardingScreen(),
+            '/formScreen1':(context) =>  const FormScreen1(),
+            '/formScreen2':(context) =>  const FormScreen2(),
+            '/formScreen3':(context) =>  const FormScreen3(),
+            '/formScreen4':(context) =>  const FormScreen4(),
+            //'/formScreen5':(context) =>  const FormScreen5(),
+            '/login': (context) => const LoginScreen(),
+            '/verifyOtp': (context) => OtpVerificationScreen(
+              mobile: ModalRoute.of(context)!.settings.arguments as String,
             ),
-          ],
+            '/termsAndConditions': (context) => const TermsAndConditionsPage(),
+            '/homeScreen': (context) =>  const HomeScreen(),
+            '/jobScreen': (context) =>  const JobsScreen(),
+            '/searchScreen': (context) => const SearchScreen(),
+            '/serverProblem': (context) => const ServerProblemScreen(),
+            '/noInternet': (context) => const NoInternetProblem(),
+            '/homeView': (context) => const HomeScreen(),
+            '/application': (context) => MyApplicationsScreen(),
+            '/interview': (context) =>  InterviewScreen(),
+            '/profileDetails': (context) =>  ProfileDetailsScreen(),
+            '/edit_job_preferences': (context) =>  JobPreferencesScreen(),
+            '/edit_resume': (context) =>  EditResumeScreen(),
+            '/edit_work_experience': (context) =>  EditWorkExperienceScreen(experiences: [],),
+            '/edit_skills': (context) =>  EditSkillsScreen(skills: [],),
+            '/edit_education': (context) =>  EditEducationScreen(),
+            '/edit_profile': (context) =>  EditProfileScreen(),
+            '/edit_personal_details': (context) => EditPersonalDetailsScreen(),
+            '/notifications': (context) =>const NotificationsScreen(),
+
+
+          },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  Widget _getScreenForState(AuthState state) {
+    // Remove splash screen after initialization
+    Future.delayed(const Duration(seconds: 3),(){FlutterNativeSplash.remove();});
+    if (state is Authenticated) {
+      return const ProfilePage();
+    } else {
+      return isFirstTime ? const OnboardingScreen() :  const HomeScreen();
+    }
+  }
 }
+
+
+
